@@ -7,6 +7,7 @@
 <title>Abdul Taowab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="assets/vendor/lenis/lenis.css">
 <style>
 /* Layout: one winding road runs the whole page. Hero up top, four education stops that pop up when the car arrives, skills at the finish. The mood moves from night and gold to a bright playful day; the JS rewrites these tokens as you scroll. */
 :root{
@@ -22,13 +23,15 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
+html.lenis{scroll-behavior:auto!important}
 body{
   background-color:var(--bg1);
-  background-image:linear-gradient(180deg,var(--bg1),var(--bg2));
-  background-attachment:fixed;
   color:var(--fg); font:400 16px/1.55 var(--body); overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));transform:translateZ(0)}
+#car,#prog{will-change:transform}
 h1,h2,h3,p{margin:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
@@ -164,6 +167,7 @@ h1,h2,h3,p{margin:0}
   .panels{grid-template-columns:minmax(0,1fr)}
   .panel{padding:26px}
   .hero{padding-block:56px 100px}
+  .info,.panel{backdrop-filter:none;-webkit-backdrop-filter:none}
   .pin{width:64px;height:64px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -183,14 +187,13 @@ h1,h2,h3,p{margin:0}
 <main id="world">
   <svg id="roadsvg" aria-hidden="true" focusable="false">
     <defs>
-      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter>
       <mask id="rm" maskUnits="userSpaceOnUse"><path id="mp" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></mask>
       <linearGradient id="beamg" x1="0" y1="1" x2="0" y2="0">
         <stop offset="0" style="stop-color:#fff6d0;stop-opacity:.6"/><stop offset="1" style="stop-color:#fff6d0;stop-opacity:0"/>
       </linearGradient>
     </defs>
     <g mask="url(#rm)">
-      <path id="pGlow" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" style="stroke:var(--acc);opacity:.28"/>
+      <path id="pGlow" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc);opacity:.12"/>
       <path id="pEdge" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc)"/>
       <path id="pRoad" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--road)"/>
       <path id="pDash" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="16 18" style="stroke:var(--dash);opacity:.85"/>
@@ -418,11 +421,21 @@ h1,h2,h3,p{margin:0}
   </section>
 </main>
 
+<script src="assets/vendor/lenis/lenis.min.js"></script>
 <script>
 (function(){
   document.documentElement.classList.add('js');
   var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var motion=matchMedia('(prefers-reduced-motion: reduce)'), reduce=motion.matches;
+  var smoother=null;
+  function configureScroll(){
+    if(smoother){smoother.destroy();smoother=null}
+    if(!reduce && window.Lenis){
+      smoother=new Lenis({autoRaf:false,lerp:.085,smoothWheel:true,syncTouch:false,anchors:true});
+      smoother.on('scroll',function(){onScroll()});
+    }
+  }
+  configureScroll();
   var world=$('#world'), svg=$('#roadsvg'), car=$('#car'), pRoad=$('#pRoad'), pEdge=$('#pEdge'), pGlow=$('#pGlow'), pDash=$('#pDash'), mp=$('#mp'), mask=$('#rm');
   var stops=$$('.stop'), scenes=$$('.scene'), finish=$('#finish'), pin=$('#pin'), cue=$('#cue');
   var ns='http://www.w3.org/2000/svg';
@@ -469,24 +482,25 @@ h1,h2,h3,p{margin:0}
     [.84, {bg1:'#f4b894',bg2:'#8fd0ef',fg:'#1b2342',muted:'#46517a',card:'rgba(255,255,255,.62)',edge:'rgba(255,255,255,.75)',acc:'#e8452a',acc2:'#0f9a94',road:'#2b3358',dash:'#ffffff',ink:'#1b2342'}],
     [1,   {bg1:'#ffd7a1',bg2:'#7fcdf2',fg:'#1b2342',muted:'#46517a',card:'rgba(255,255,255,.66)',edge:'rgba(255,255,255,.8)',acc:'#e8452a',acc2:'#0f9a94',road:'#2b3358',dash:'#ffffff',ink:'#1b2342'}]
   ].map(function(k){var o={}; for(var n in k[1]) o[n]=col(k[1][n]); return [k[0],o]});
-  var names=Object.keys(raw[0][1]);
+  var names=Object.keys(raw[0][1]), moodValues={};
+  function setMood(root,name,value){if(moodValues[name]!==value){root.setProperty(name,value);moodValues[name]=value}}
   function sm(a,b,x){x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)}
   function moodAt(t){
     var i=0; while(i<raw.length-2 && t>raw[i+1][0]) i++;
     var a=raw[i], b=raw[i+1], k=sm(a[0],b[0],t), root=document.documentElement.style;
     names.forEach(function(n){
       var x=a[1][n], y=b[1][n], v=[0,1,2,3].map(function(j){return x[j]+(y[j]-x[j])*k});
-      root.setProperty('--'+n,'rgba('+Math.round(v[0])+','+Math.round(v[1])+','+Math.round(v[2])+','+v[3].toFixed(3)+')');
+      setMood(root,'--'+n,'rgba('+Math.round(v[0])+','+Math.round(v[1])+','+Math.round(v[2])+','+v[3].toFixed(3)+')');
     });
-    root.setProperty('--stars',(1-sm(.12,.52,t)).toFixed(3));
-    root.setProperty('--cloud',sm(.6,.84,t).toFixed(3));
-    root.setProperty('--sun',sm(.68,.95,t).toFixed(3));
-    root.setProperty('--beam',(1-sm(.58,.8,t)).toFixed(3));
+    setMood(root,'--stars',(1-sm(.12,.52,t)).toFixed(3));
+    setMood(root,'--cloud',sm(.6,.84,t).toFixed(3));
+    setMood(root,'--sun',sm(.68,.95,t).toFixed(3));
+    setMood(root,'--beam',(1-sm(.58,.8,t)).toFixed(3));
     return 1-sm(.12,.52,t);
   }
 
   /* road */
-  var W=0,H=0,L=1,N=1,cm=[],stopTop=[],stopH=[],worldTop=0,mobile=false,rw=70,pinY=0,carScale=1;
+  var W=0,H=0,L=1,N=1,cm=[],stopTop=[],stopH=[],worldTop=0,mobile=false,rw=70,pinY=0,carScale=1,maxScroll=1,pointsX=[],pointsY=[],roadDirty=true;
   function catmull(p){
     var d='M'+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
     for(var i=0;i<p.length-1;i++){
@@ -522,9 +536,11 @@ h1,h2,h3,p{margin:0}
     mp.setAttribute('stroke-width',rw+60);
     pRoad.setAttribute('stroke-width',rw); pEdge.setAttribute('stroke-width',rw+(mobile?5:8)); pGlow.setAttribute('stroke-width',rw+16);
     pDash.setAttribute('stroke-width',mobile?2:3); pDash.setAttribute('stroke-dasharray',mobile?'10 12':'16 18');
-    L=pRoad.getTotalLength(); N=Math.max(50,Math.ceil(L/6)); cm=[]; var m=-1;
-    for(var i=0;i<=N;i++){var y=pRoad.getPointAtLength(L*i/N).y; if(y>m)m=y; cm.push(m)}
+    L=pRoad.getTotalLength(); N=Math.max(50,Math.ceil(L/6)); cm=[]; pointsX=new Float32Array(N+1);pointsY=new Float32Array(N+1);var m=-1;
+    for(var i=0;i<=N;i++){var point=pRoad.getPointAtLength(L*i/N);pointsX[i]=point.x;pointsY[i]=point.y;if(point.y>m)m=point.y;cm.push(m)}
     mp.setAttribute('stroke-dasharray',L);
+    maxScroll=Math.max(1,document.documentElement.scrollHeight-innerHeight);roadDirty=true;
+    if(smoother)smoother.resize();
     onScroll(true);
   }
   function lenAtY(y){
@@ -535,13 +551,16 @@ h1,h2,h3,p{margin:0}
 
   var target=0,cur=0,t=0,lastT=-1,starOp=1,carY=0;
   function onScroll(snap){
-    var max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
-    t=Math.max(0,Math.min(1,window.scrollY/max));
+    t=Math.max(0,Math.min(1,window.scrollY/maxScroll));
     target=lenAtY(window.scrollY+innerHeight*.72-worldTop);
     if(snap===true && (reduce||cur===0)) cur=target;
   }
+  function pointAt(distance){
+    var position=Math.max(0,Math.min(N,distance/L*N)),i=Math.min(N-1,Math.floor(position)),f=position-i;
+    return {x:pointsX[i]+(pointsX[i+1]-pointsX[i])*f,y:pointsY[i]+(pointsY[i+1]-pointsY[i])*f};
+  }
   function draw(){
-    var pt=pRoad.getPointAtLength(cur), a=pRoad.getPointAtLength(Math.max(0,cur-4)), b=pRoad.getPointAtLength(Math.min(L,cur+4));
+    var pt=pointAt(cur), a=pointAt(Math.max(0,cur-4)), b=pointAt(Math.min(L,cur+4));
     var ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI+90;
     car.setAttribute('transform','translate('+pt.x.toFixed(1)+','+pt.y.toFixed(1)+') rotate('+ang.toFixed(1)+') scale('+carScale+')');
     mp.setAttribute('stroke-dashoffset',(L-cur).toFixed(1));
@@ -562,7 +581,7 @@ h1,h2,h3,p{margin:0}
   /* stars */
   var cv=$('#stars'), cx=cv.getContext('2d'), stars=[], dpr=1;
   function sizeStars(){
-    dpr=Math.min(2,window.devicePixelRatio||1); cv.width=innerWidth*dpr; cv.height=innerHeight*dpr;
+    dpr=Math.min(1.5,window.devicePixelRatio||1); cv.width=innerWidth*dpr; cv.height=innerHeight*dpr;
     stars=[]; for(var i=0,n=Math.round(innerWidth*innerHeight/8000);i<n;i++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.3+.3,p:Math.random()*6.28,s:.4+Math.random()*1.3});
   }
   function drawStars(ts,op){
@@ -573,14 +592,34 @@ h1,h2,h3,p{margin:0}
     }
   }
 
-  var prog=$('#prog');
+  var prog=$('#prog'),lastFrame=0,lastStars=-Infinity,lastMood=-Infinity,starsCleared=false,rafId=0;
+  function scheduleFrame(){if(!rafId && !document.hidden)rafId=requestAnimationFrame(frame)}
   function frame(ts){
-    cur+=(target-cur)*(reduce?1:.11); if(Math.abs(target-cur)<.4) cur=target;
-    draw();
-    if(Math.abs(t-lastT)>.0005){starOp=moodAt(t); lastT=t; prog.style.setProperty('--p',t.toFixed(4))}
-    drawStars(ts,starOp);
-    requestAnimationFrame(frame);
+    rafId=0;
+    if(document.hidden){lastFrame=0;return}
+    var dt=lastFrame?Math.min(64,ts-lastFrame):1000/60;lastFrame=ts;
+    if(smoother)smoother.raf(ts);
+    var previous=cur;
+    cur+=(target-cur)*(reduce?1:1-Math.exp(-dt/110));
+    if(Math.abs(target-cur)<.05)cur=target;
+    if(roadDirty || cur!==previous){draw();roadDirty=false}
+    if(Math.abs(t-lastT)>.0003 && ts-lastMood>=1000/30){
+      starOp=moodAt(t);lastT=t;lastMood=ts;prog.style.setProperty('--p',t.toFixed(4));
+    }
+    if(starOp<.02){
+      if(!starsCleared){cx.clearRect(0,0,cv.width,cv.height);starsCleared=true}
+    }else if(ts-lastStars>=1000/30 && (!reduce || lastStars===-Infinity)){
+      drawStars(ts,starOp);lastStars=ts;starsCleared=false;
+    }
+    scheduleFrame();
   }
+  addEventListener('visibilitychange',function(){
+    if(document.hidden){cancelAnimationFrame(rafId);rafId=0}
+    else{lastFrame=0;lastStars=-Infinity;scheduleFrame()}
+  });
+  motion.addEventListener('change',function(event){
+    reduce=event.matches;configureScroll();lastStars=-Infinity;roadDirty=true;onScroll(true);
+  });
 
   /* reveals for the skills section */
   var rev=$$('.reveal');
@@ -589,15 +628,15 @@ h1,h2,h3,p{margin:0}
     rev.forEach(function(r){io.observe(r)});
   } else rev.forEach(function(r){r.classList.add('in')});
 
-  $('#top').addEventListener('click',function(e){e.preventDefault();window.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
+  $('#top').addEventListener('click',function(e){e.preventDefault();if(smoother)smoother.scrollTo(0);else window.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
 
   addEventListener('scroll',function(){onScroll()},{passive:true});
-  var rt; addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){sizeStars();build()},120)});
+  var rt; addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){sizeStars();lastStars=-Infinity;starsCleared=false;build()},120)});
   if(window.ResizeObserver) new ResizeObserver(function(){clearTimeout(rt);rt=setTimeout(build,120)}).observe(world);
   sizeStars(); build(); moodAt(0);
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
   addEventListener('load',build);
-  requestAnimationFrame(frame);
+  scheduleFrame();
 })();
 </script>
 
