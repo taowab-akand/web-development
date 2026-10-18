@@ -1,15 +1,605 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111813"><title>Abdul Taowab — The road so far</title><link rel="stylesheet" href="style.css"></head>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html,body{margin:0}</style>
+<title>Abdul Taowab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<style>
+/* Layout: one winding road runs the whole page. Hero up top, four education stops that pop up when the car arrives, skills at the finish. The mood moves from night and gold to a bright playful day; the JS rewrites these tokens as you scroll. */
+:root{
+  --bg1:#05060a; --bg2:#0b0d14; --fg:#f2ebdd; --muted:#a79e8c;
+  --card:rgba(20,20,28,.58); --edge:rgba(217,182,115,.30);
+  --acc:#d9b673; --acc2:#d9b673; --road:#15161c; --dash:#d9b673; --ink:#1a1406;
+  --stars:1; --cloud:0; --sun:0; --beam:1;
+  --display:'Bodoni Moda',Didot,'Times New Roman',serif;
+  --body:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'DM Mono',ui-monospace,Menlo,monospace;
+  --fun:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background-color:var(--bg1);
+  background-image:linear-gradient(180deg,var(--bg1),var(--bg2));
+  background-attachment:fixed;
+  color:var(--fg); font:400 16px/1.55 var(--body); overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,p{margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+
+#stars{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.sun{position:fixed;top:-140px;right:-100px;width:440px;height:440px;border-radius:50%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle,#fffbe0 0%,rgba(255,214,120,.7) 38%,rgba(255,214,120,0) 70%);opacity:var(--sun)}
+.cloud{position:fixed;z-index:0;pointer-events:none;width:360px;height:90px;border-radius:999px;background:#fff;filter:blur(20px);
+  opacity:calc(var(--cloud)*.6);animation:drift 70s linear infinite}
+.cloud.c1{top:14%;left:-400px}
+.cloud.c2{top:46%;left:-400px;animation-duration:95s;animation-delay:-40s;width:460px}
+.cloud.c3{top:74%;left:-400px;animation-duration:80s;animation-delay:-18s;width:300px}
+@keyframes drift{to{transform:translateX(calc(100vw + 900px))}}
+#prog{position:fixed;left:0;right:0;top:env(safe-area-inset-top,0px);height:3px;z-index:30;background:var(--acc);transform-origin:0 50%;transform:scaleX(var(--p,0));pointer-events:none}
+
+#world{position:relative;z-index:1;overflow:hidden}
+#roadsvg{position:absolute;left:0;top:0;z-index:1;pointer-events:none;overflow:visible}
+#car{opacity:0;transition:opacity .4s}
+#car.live{opacity:1}
+#car .beam{opacity:var(--beam)}
+
+/* hero */
+.hero{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:30px;text-align:center;
+  padding-block:76px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.kicker{font:500 12px/1 var(--mono);letter-spacing:.32em;text-transform:uppercase;color:var(--acc);display:flex;align-items:center;gap:14px}
+.kicker::before,.kicker::after{content:"";width:34px;height:1px;background:var(--acc);opacity:.6}
+.portrait{position:relative;width:clamp(210px,26vw,292px);aspect-ratio:4/5;padding:3px;border-radius:999px 999px 30px 30px;
+  background:linear-gradient(110deg,var(--acc) 0 30%,#fff7da 46%,var(--acc) 62% 100%);background-size:260% 100%;animation:sheen 7s linear infinite;
+  box-shadow:0 40px 110px -30px rgba(217,182,115,.35);opacity:0;animation:sheen 7s linear infinite,fadeIn 1.2s .1s forwards}
+@keyframes sheen{to{background-position:-260% 0}}
+@keyframes fadeIn{to{opacity:1}}
+.frame{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;width:100%;height:100%;cursor:pointer;
+  border-radius:999px 999px 27px 27px;overflow:hidden;background:radial-gradient(120% 90% at 50% 20%,#1b1a22,#08090d);background-size:cover;background-position:center top}
+.frame .mono{font:italic 500 clamp(64px,9vw,96px)/1 var(--display);color:var(--acc);letter-spacing:-.02em}
+.frame .hint{font:500 11px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:8px 12px;border:1px solid var(--edge);border-radius:99px}
+.frame.has .mono,.frame.has .hint{display:none}
+.portrait:focus-within{outline:2px solid var(--acc);outline-offset:5px}
+.name{font:500 clamp(52px,12.5vw,170px)/.9 var(--display);letter-spacing:-.025em;text-wrap:balance}
+.name .w{display:inline-block;white-space:nowrap}
+.name .it{font-style:italic;color:var(--acc);font-weight:400}
+.name .l{display:inline-block;animation:letterUp 1.1s cubic-bezier(.2,.9,.2,1) both;animation-delay:calc(.35s + var(--i)*.055s)}
+@keyframes letterUp{from{opacity:0;transform:translateY(.45em) rotate(3deg)}to{opacity:1;transform:none}}
+.role{font:500 clamp(13px,1.6vw,16px)/1.4 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.role b{color:var(--fg);font-weight:500}
+.cue{display:flex;flex-direction:column;align-items:center;gap:12px;font:500 11px/1 var(--mono);letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-top:14px}
+.cue i{width:1px;height:56px;background:linear-gradient(var(--acc),transparent);transform-origin:top;animation:cue 2.2s ease-in-out infinite}
+@keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+
+/* stops */
+.stop{position:relative;z-index:2;padding-block:70px 130px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(32px,7vw,120px);align-items:end;max-width:1180px;margin-inline:auto;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.stop.flip .scene{order:2}
+.stop.flip .info{order:1}
+.scene{position:relative;width:min(100%,430px);aspect-ratio:360/290;justify-self:center}
+.scene svg{display:block;width:100%;height:100%;overflow:visible}
+.info{padding:30px 32px 32px;border-radius:22px;background:var(--card);border:1px solid var(--edge);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);min-width:0}
+.eyebrow{font:500 11px/1.4 var(--mono);letter-spacing:.26em;text-transform:uppercase;color:var(--acc)}
+.info h3{font:500 clamp(28px,3.4vw,40px)/1.08 var(--display);margin-top:12px;text-wrap:balance}
+.big{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:22px}
+.big span{font:italic 500 clamp(64px,9vw,104px)/.95 var(--display);color:var(--acc);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big small{font:500 11px/1.4 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.stats{list-style:none;margin:24px 0 0;padding:20px 0 0;border-top:1px solid var(--edge);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.stats b{display:block;font:500 28px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.stats span{display:block;margin-top:6px;font-size:13px;color:var(--muted);line-height:1.35}
+
+.js .stop .part{opacity:0;transform-box:fill-box;transform-origin:50% 100%;transform:translateY(34px) scaleY(.5)}
+.js .stop.on .part{animation:rise .8s cubic-bezier(.2,1.35,.4,1) var(--d,0s) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.win{fill:#ffe29a;opacity:.2}
+.stop.on .win{animation:lit .55s ease-out forwards;animation-delay:var(--wd,1s)}
+@keyframes lit{0%{opacity:.2}35%{opacity:1}52%{opacity:.45}100%{opacity:1}}
+.puff{fill:none;stroke:var(--acc);stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center}
+.stop.on .puff{animation:puff 1.2s ease-out .05s}
+@keyframes puff{0%{opacity:.9;transform:scale(.08)}100%{opacity:0;transform:scale(1)}}
+.flag{transform-box:fill-box;transform-origin:0 50%;animation:wave 2.4s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:skewY(0) scaleX(1)}50%{transform:skewY(7deg) scaleX(.93)}}
+.js .info{opacity:0;transform:translateY(26px);transition:opacity .9s .35s,transform .9s cubic-bezier(.2,.9,.2,1) .35s}
+.js .stop.on .info{opacity:1;transform:none}
+
+/* skills */
+.finish{position:relative;z-index:2;padding-block:20px 0}
+.pin{width:78px;height:78px;margin:0 auto;border-radius:50%;filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
+.js .pin{transform:scale(0);transition:transform .8s cubic-bezier(.2,1.5,.4,1)}
+.js .finish.on .pin{transform:scale(1)}
+.skills-head{text-align:center;padding:36px max(16px,env(safe-area-inset-left,0px)) 0 max(16px,env(safe-area-inset-right,0px))}
+.skills-head .eyebrow{display:block}
+.skills-head h2{font:500 clamp(54px,11vw,136px)/.95 var(--display);letter-spacing:-.025em;margin-top:14px}
+.skills-head h2 em{color:var(--acc);font-weight:400}
+.skills-head p{max-width:46ch;margin:18px auto 0;color:var(--muted);font-size:17px}
+.panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:1080px;margin:56px auto 0;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.panel{padding:34px;border-radius:26px;background:var(--card);border:1px solid var(--edge);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);min-width:0}
+.panel h3{font:700 clamp(26px,3.2vw,36px)/1.05 var(--fun);letter-spacing:-.02em}
+.panel.web h3{color:var(--acc)}
+.panel.sec h3{color:var(--acc2)}
+.panel p{margin-top:12px;color:var(--muted);max-width:40ch}
+.chips{list-style:none;margin:26px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.chips li{padding:10px 16px;border-radius:99px;font:600 14px/1 var(--fun);border:1px solid var(--edge);cursor:default;
+  transition:transform .35s cubic-bezier(.3,1.8,.5,1),background .3s}
+.panel.web .chips li{background:color-mix(in srgb,var(--acc) 16%,transparent)}
+.panel.sec .chips li{background:color-mix(in srgb,var(--acc2) 16%,transparent)}
+.chips li:hover{transform:translateY(-4px) rotate(-2deg) scale(1.05)}
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .9s,transform .9s cubic-bezier(.2,.9,.2,1)}
+.js .reveal.in{opacity:1;transform:none}
+.js .panel.reveal:nth-child(2){transition-delay:.12s}
+.js .chips li{opacity:0;transform:translateY(12px) scale(.9)}
+.js .panel.in .chips li{opacity:1;transform:none;transition:opacity .5s,transform .6s cubic-bezier(.3,1.6,.5,1);transition-delay:calc(.35s + var(--k)*.07s)}
+.js .panel.in .chips li:hover{transition-delay:0s;transform:translateY(-4px) rotate(-2deg) scale(1.05)}
+.marquee{margin-top:90px;overflow:hidden;white-space:nowrap;padding-block:10px}
+.marquee div{display:inline-flex;animation:slide 38s linear infinite}
+.marquee span{font:800 clamp(44px,9vw,112px)/1.1 var(--fun);letter-spacing:-.03em;padding-right:.5em;-webkit-text-stroke:1.5px var(--fg);color:transparent}
+.marquee span.f{color:var(--acc);-webkit-text-stroke:0}
+@keyframes slide{to{transform:translateX(-50%)}}
+.foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;max-width:1080px;margin:56px auto 0;padding-block:28px 56px;
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));border-top:1px solid var(--edge);
+  font:500 12px/1.4 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.foot a{color:var(--fg);text-decoration:none;padding:12px 18px;border:1px solid var(--edge);border-radius:99px}
+.foot a:hover{background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.float{position:absolute;z-index:1;pointer-events:none;opacity:calc(var(--cloud)*.9);animation:bob 7s ease-in-out infinite}
+.float.a{top:150px;left:6%;width:34px;height:34px;border-radius:50%;background:var(--acc)}
+.float.b{top:260px;right:8%;width:30px;height:30px;border-radius:8px;background:var(--acc2);animation-delay:-2s;rotate:14deg}
+.float.c{top:520px;left:10%;width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:32px solid var(--acc2);animation-delay:-4s}
+.float.d{top:620px;right:5%;width:46px;height:46px;border-radius:50%;border:8px solid var(--acc);animation-delay:-1s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+
+@media (max-width:819px){
+  .stop{padding-block:56px 100px}
+  .row{grid-template-columns:minmax(0,1fr);gap:22px;padding-left:max(52px,env(safe-area-inset-left,0px));padding-right:max(52px,env(safe-area-inset-right,0px))}
+  .info{order:1!important;padding:24px 22px 26px}
+  .scene{order:2!important;width:min(100%,300px);justify-self:start}
+  .stop.flip .scene{justify-self:end}
+  .panels{grid-template-columns:minmax(0,1fr)}
+  .panel{padding:26px}
+  .hero{padding-block:56px 100px}
+  .pin{width:64px;height:64px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0s!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
 <body>
-<header><a class="brand" href="#home">AT<span>✦</span></a><a href="#journey">THE JOURNEY <span>↗</span></a><a href="#craft">MY CRAFT <span>↗</span></a><button id="sound" aria-pressed="false">SOUND OFF <span>⌁</span></button></header>
-<main><section class="hero" id="home"><div class="hero-top"><span>WEB DEVELOPER & CYBERSECURITY SPECIALIST</span><span>CURIOUS BY NATURE. BUILDER BY CHOICE.</span></div><div class="hero-copy"><div class="eyebrow"><i></i> A LIFE IN CONSTANT MOTION</div><h1>Every turn.<br>A new <em>possibility.</em></h1><p>I’m Abdul Taowab. A developer, a defender,<br>and a believer that the journey shapes the craft.</p><a class="round-link" href="#journey"><span>↓</span> FOLLOW MY ROAD</a></div><div class="portrait"><div class="orbit"></div><div class="portrait-art"><div class="portrait-fallback" role="img" aria-label="Abdul Taowab monogram"><span>AT</span><small>THE NEXT CHAPTER<br>IS ALWAYS AHEAD.</small></div><img id="portrait-photo" alt="Abdul Taowab in a charcoal suit" width="1024" height="1536" decoding="async" fetchpriority="high" hidden><span class="portrait-spark">✦</span></div><div class="portrait-label"><span>01 / THE PERSON</span><strong>Abdul Taowab</strong><span class="portrait-caption">DEVELOPER. DEFENDER. DREAMER.</span><span>BANGLADESH · BUILDING BEYOND BORDERS</span></div><div class="coordinate">24°22′ N<br>88°36′ E</div></div><div class="hero-footer"><span>SCROLL TO EXPLORE</span><span>A FEW PLACES. A THOUSAND LESSONS.</span><span>↓</span></div></section>
-<section class="journey" id="journey"><div class="story-atmosphere" aria-hidden="true"><div class="moon"></div><div class="cloud cloud-one"></div><div class="cloud cloud-two"></div><div class="distant-hills"></div></div><div class="section-intro"><span class="eyebrow">01 — THE ROAD SO FAR</span><h2>Places that<br>made me <em>me.</em></h2><p>Follow the little paper plane.<br>Every bend holds another chapter.</p></div><div class="map-world" aria-hidden="true"><svg class="road" viewBox="0 0 1000 2400" preserveAspectRatio="none">
-<defs><linearGradient id="paint" x1="0" x2=".8" y1="0" y2="1"><stop stop-color="#e3bd8c"/><stop offset=".5" stop-color="#efcfad"/><stop offset="1" stop-color="#fff1c3"/></linearGradient><linearGradient id="grass" x2="1" y2="1"><stop stop-color="#496b61"/><stop offset="1" stop-color="#96b990"/></linearGradient><filter id="watercolor" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".025" numOctaves="2" seed="8" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="7"/></filter><path id="winding-path" fill="none" d="M500 0 C950 160 900 450 500 520 S70 900 500 1100 S950 1500 500 1700 S150 2100 500 2400"/><symbol id="tree" viewBox="0 0 70 100"><path d="M35 58v37" stroke="#696c4c" stroke-width="5"/><path d="M35 5 6 58h13L8 77h54L51 58h13Z" fill="#7f9e77"/><path d="M35 5 35 77h27L51 58h13Z" fill="#426c5d" opacity=".65"/><path d="m35 19-12 28h10" fill="none" stroke="#b3c991" stroke-width="2"/></symbol><symbol id="flower" viewBox="0 0 30 40"><path d="M15 16v24m0-8-8-5" stroke="#83a176" stroke-width="2"/><g fill="#edb5ae"><circle cx="9" cy="11" r="6"/><circle cx="20" cy="11" r="6"/><circle cx="15" cy="5" r="6"/><circle cx="15" cy="17" r="6"/></g><circle cx="15" cy="11" r="4" fill="#ffe8ad"/></symbol></defs>
-<use href="#winding-path" class="path-meadow"/><use href="#winding-path" class="path-bank"/><use href="#winding-path" class="path-paint"/><use href="#winding-path" class="path-texture"/><path id="road-progress" d="M500 0 C950 160 900 450 500 520 S70 900 500 1100 S950 1500 500 1700 S150 2100 500 2400"/>
-<g class="map-garden"></g><g id="traveler"><circle r="24" fill="#ffe8b5" opacity=".14"/><circle r="14" fill="#ffe8b5" opacity=".2"/><path d="m-13-11 32 12-24 5 2 12-9-13Z" fill="#fff5d4" stroke="#bd995d" stroke-width="1.5"/><path d="M-5 6 19 1-8 1" fill="none" stroke="#bd995d" stroke-width="1"/></g></svg><div class="fireflies"></div></div>
-<div class="journey-guide"><span class="guide-label">A LITTLE FURTHER, A LITTLE BRIGHTER</span><div class="chapter-nav" aria-label="Education chapters"><a href="#rcc" aria-label="Rajshahi Cadet College">01</a><a href="#bzs" aria-label="Bogra Zilla School">02</a><a href="#ndc" aria-label="Notre Dame College">03</a><a href="#bracu" aria-label="BRAC University">04</a></div></div>
-<article class="stop right" id="rcc"><div class="landmark" data-type="cadet"></div><div class="stop-copy"><span class="chapter">CHAPTER 01 · THE FOUNDATION</span><h3>Discipline.<br>Before everything.</h3><h4>Rajshahi Cadet College</h4><p>A chapter in the journey. A foundation of discipline, resilience, and showing up with purpose.</p><span class="badge">RCC <b>↗</b> BATCH 52</span></div><span class="stop-number">01</span></article>
-<article class="stop left" id="bzs"><div class="landmark" data-type="school"></div><div class="stop-copy"><span class="chapter">CHAPTER 02 · FINDING MY STRIDE</span><h3>Curiosity meets<br><em>ambition.</em></h3><h4>Bogra Zilla School</h4><p>Learning to ask better questions. And discovering how far a little determination can take you.</p><span class="badge">SSC 2019 <b>↗</b> GPA 5.00</span><span class="achievement">✦ 21ST PLACE · BOARD MERIT POSITION</span></div><span class="stop-number">02</span></article>
-<article class="stop right" id="ndc"><div class="landmark" data-type="college"></div><div class="stop-copy"><span class="chapter">CHAPTER 03 · RAISING THE BAR</span><h3>A bigger world.<br>A bolder vision.</h3><h4>Notre Dame College</h4><p>A new environment. Higher aspirations. Another step toward building a future of my own.</p><span class="badge">HSC 2021 <b>↗</b> GPA 5.00</span><span class="achievement">✦ 8TH PLACE · BOARD MERIT POSITION</span></div><span class="stop-number">03</span></article>
-<article class="stop left" id="bracu"><div class="landmark" data-type="university"></div><div class="stop-copy"><span class="chapter">CHAPTER 04 · BUILDING WHAT’S NEXT</span><h3>From learning.<br>To <em>creating.</em></h3><h4>BRAC University</h4><p>Turning curiosity into craft. Exploring the intersection of thoughtful web experiences and a more secure digital world.</p><span class="badge">BRACU <b>↗</b> EXPECTED GRADUATION 2027</span></div><span class="stop-number">04</span></article></section>
-<section class="craft" id="craft"><div class="eyebrow">02 — WHAT I BRING TO THE TABLE</div><h2>Built with curiosity.<br>Backed by <em>purpose.</em></h2><div class="skill-grid"><button class="skill" aria-expanded="false"><span>01 / CREATE</span><h3>Web<br>development <b>↗</b></h3><p>Thoughtful interfaces. Interactive experiences.<br>Built for the people who use them.</p><div class="skill-detail">My focus: bringing ideas to life on the web, with attention to experience, clarity, and interaction.</div><small>EXPLORE MY FOCUS +</small></button><button class="skill" aria-expanded="false"><span>02 / PROTECT</span><h3>Cyber<br>security <b>↗</b></h3><p>A curious mind. A defensive mindset.<br>Making the digital world more resilient.</p><div class="skill-detail">My focus: understanding digital risks and approaching technology with security in mind.</div><small>EXPLORE MY FOCUS +</small></button></div><div class="closing"><span>THE ROAD DOESN’T END HERE.</span><h2>On to the<br><em>next possibility.</em> <a href="#home" aria-label="Back to top">↗</a></h2><p>Always learning. Always building. Always moving.</p></div><footer><a class="brand" href="#home">AT<span>✦</span></a><span>ABDUL TAOWAB</span><span>MADE OF EVERY CHAPTER.</span><a href="#home">BACK TO TOP ↑</a></footer></section></main><div class="scroll-indicator" aria-hidden="true"><i></i></div><script src="script.js"></script></body></html>
+
+
+<div id="prog"></div>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="sun" aria-hidden="true"></div>
+<div class="cloud c1" aria-hidden="true"></div><div class="cloud c2" aria-hidden="true"></div><div class="cloud c3" aria-hidden="true"></div>
+
+<main id="world">
+  <svg id="roadsvg" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter>
+      <mask id="rm" maskUnits="userSpaceOnUse"><path id="mp" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></mask>
+      <linearGradient id="beamg" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" style="stop-color:#fff6d0;stop-opacity:.6"/><stop offset="1" style="stop-color:#fff6d0;stop-opacity:0"/>
+      </linearGradient>
+    </defs>
+    <g mask="url(#rm)">
+      <path id="pGlow" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" style="stroke:var(--acc);opacity:.28"/>
+      <path id="pEdge" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--acc)"/>
+      <path id="pRoad" fill="none" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--road)"/>
+      <path id="pDash" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="16 18" style="stroke:var(--dash);opacity:.85"/>
+    </g>
+    <g id="car">
+      <ellipse cx="3" cy="4" rx="13" ry="22" fill="#000" opacity=".3"/>
+      <polygon class="beam" points="-9,-21 9,-21 38,-110 -38,-110" fill="url(#beamg)"/>
+      <rect x="-12" y="-14" width="4" height="10" rx="1.5" fill="#0a0a0d"/><rect x="8" y="-14" width="4" height="10" rx="1.5" fill="#0a0a0d"/>
+      <rect x="-12" y="7" width="4" height="10" rx="1.5" fill="#0a0a0d"/><rect x="8" y="7" width="4" height="10" rx="1.5" fill="#0a0a0d"/>
+      <rect x="-9.5" y="-21" width="19" height="42" rx="8" style="fill:var(--acc)"/>
+      <rect x="-6.5" y="-10" width="13" height="10" rx="3" fill="#10131c"/>
+      <rect x="-6.5" y="6" width="13" height="6" rx="2.5" fill="#10131c" opacity=".85"/>
+      <circle cx="-5.5" cy="-19.5" r="2.2" fill="#fff"/><circle cx="5.5" cy="-19.5" r="2.2" fill="#fff"/>
+    </g>
+  </svg>
+
+  <header class="hero" id="hero">
+    <p class="kicker">Portfolio · 2026</p>
+    <div class="portrait">
+      <label class="frame" id="frame" for="photo">
+        <span class="mono">AT</span>
+        <span class="hint">Add your photo</span>
+      </label>
+      <input class="sr" id="photo" type="file" accept="image/*" aria-label="Choose your portrait photo">
+    </div>
+    <h1 class="name" aria-label="Abdul Taowab"><span class="w split">Abdul</span> <span class="w it split">Taowab</span></h1>
+    <p class="role"><b>Web Developer</b> &nbsp;/&nbsp; <b>Cyber Security Expert</b></p>
+    <div class="cue" id="cue"><span>Scroll and follow the road</span><i></i></div>
+  </header>
+
+  <section class="stop" id="s1" aria-label="Rajshahi Cadet College">
+    <div class="row">
+      <div class="scene">
+        <svg viewBox="0 0 360 290" role="img" aria-label="Illustration of Rajshahi Cadet College">
+          <ellipse class="puff" cx="180" cy="262" rx="190" ry="16"/>
+          <g class="part" style="--d:0s"><ellipse cx="180" cy="266" rx="172" ry="11" fill="#000" opacity=".3"/></g>
+          <g class="part" style="--d:.05s">
+            <rect x="22" y="168" width="112" height="90" fill="#d8c394"/><rect x="226" y="168" width="112" height="90" fill="#d8c394"/>
+            <rect x="16" y="160" width="124" height="10" fill="#2f5d4a"/><rect x="220" y="160" width="124" height="10" fill="#2f5d4a"/>
+            <g data-grid="38,188,16,30,3,1,12,0" data-r="8"></g><g data-grid="242,188,16,30,3,1,12,0" data-r="8"></g>
+          </g>
+          <g class="part" style="--d:.2s">
+            <rect x="124" y="118" width="112" height="140" fill="#e6d4a6"/><rect x="118" y="110" width="124" height="10" fill="#2f5d4a"/>
+            <rect x="150" y="130" width="60" height="22" rx="3" fill="#2f5d4a"/>
+            <text x="180" y="146" text-anchor="middle" font-family="Bodoni Moda,serif" font-size="14" font-weight="700" letter-spacing="2" fill="#ffe9b8">RCC</text>
+            <path d="M162 258V214a18 18 0 0 1 36 0V258Z" fill="#3a2a1c"/>
+            <rect class="win" x="134" y="172" width="14" height="28" rx="7"/><rect class="win" x="212" y="172" width="14" height="28" rx="7"/>
+            <rect x="146" y="252" width="68" height="6" fill="#c8b283"/>
+          </g>
+          <g class="part" style="--d:.35s">
+            <rect x="152" y="62" width="56" height="50" fill="#efe0b6"/><rect x="146" y="56" width="68" height="8" fill="#2f5d4a"/>
+            <circle cx="180" cy="86" r="14" fill="#fff6dc" stroke="#2f5d4a" stroke-width="3"/>
+            <path d="M180 86V77M180 86L186 90" stroke="#2f5d4a" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <path d="M152 56Q180 4 208 56Z" fill="#2f5d4a"/><path d="M180 20V4" stroke="#d9b673" stroke-width="3"/><circle cx="180" cy="4" r="3.5" fill="#d9b673"/>
+          </g>
+          <g class="part" style="--d:.5s">
+            <path d="M14 258V118" stroke="#e8e0cc" stroke-width="3" fill="none"/>
+            <g class="flag"><rect x="15" y="120" width="36" height="22" fill="#006a4e"/><circle cx="31" cy="131" r="6" fill="#f42a41"/></g>
+          </g>
+        </svg>
+      </div>
+      <article class="info">
+        <p class="eyebrow">RCC · The beginning</p>
+        <h3>Rajshahi Cadet College</h3>
+        <div class="big"><span data-to="52" data-from="0">52</span><small>Batch</small></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="stop flip" id="s2" aria-label="Bogra Zilla School">
+    <div class="row">
+      <div class="scene">
+        <svg viewBox="0 0 360 290" role="img" aria-label="Illustration of Bogra Zilla School">
+          <ellipse class="puff" cx="180" cy="262" rx="190" ry="16"/>
+          <g class="part" style="--d:0s"><ellipse cx="180" cy="266" rx="172" ry="11" fill="#000" opacity=".3"/></g>
+          <g class="part" style="--d:.05s">
+            <rect x="28" y="150" width="304" height="108" fill="#b8573c"/><rect x="22" y="142" width="316" height="10" fill="#3d4b5e"/>
+            <path d="M28 176H332M28 202H332M28 228H332" stroke="#a24b33" stroke-width="2" fill="none"/>
+            <g data-grid="46,164,18,26,2,2,16,16"></g><g data-grid="262,164,18,26,2,2,16,16"></g>
+          </g>
+          <g class="part" style="--d:.25s">
+            <rect x="116" y="150" width="128" height="108" fill="#c96a4e"/><rect x="110" y="142" width="140" height="10" fill="#3d4b5e"/>
+            <polygon points="108,144 180,84 252,144" fill="#3d4b5e"/>
+            <circle cx="180" cy="120" r="10" fill="#ffe9b8" stroke="#2c3646" stroke-width="3"/>
+            <rect x="146" y="158" width="68" height="22" rx="3" fill="#2c3646"/>
+            <text x="180" y="174" text-anchor="middle" font-family="Bodoni Moda,serif" font-size="14" font-weight="700" letter-spacing="2" fill="#ffe9b8">BZS</text>
+            <path d="M164 258V216a16 16 0 0 1 32 0V258Z" fill="#2a1d18"/>
+            <rect class="win" x="128" y="194" width="16" height="28" rx="2"/><rect class="win" x="216" y="194" width="16" height="28" rx="2"/>
+          </g>
+          <g class="part" style="--d:.45s">
+            <path d="M180 88V46" stroke="#e8e0cc" stroke-width="3" fill="none"/>
+            <g class="flag"><rect x="181" y="46" width="28" height="17" fill="#006a4e"/><circle cx="194" cy="54.5" r="4.8" fill="#f42a41"/></g>
+          </g>
+        </svg>
+      </div>
+      <article class="info">
+        <p class="eyebrow">BZS · Secondary school</p>
+        <h3>Bogra Zilla School</h3>
+        <div class="big"><span data-to="2019" data-from="1980">2019</span><small>SSC · Passing year</small></div>
+        <ul class="stats">
+          <li><b>5.00</b><span>GPA</span></li>
+          <li><b>21st</b><span>Board merit position</span></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="stop" id="s3" aria-label="Notre Dame College">
+    <div class="row">
+      <div class="scene">
+        <svg viewBox="0 0 360 290" role="img" aria-label="Illustration of Notre Dame College">
+          <ellipse class="puff" cx="180" cy="262" rx="190" ry="16"/>
+          <g class="part" style="--d:0s"><ellipse cx="180" cy="266" rx="172" ry="11" fill="#000" opacity=".3"/></g>
+          <g class="part" style="--d:.05s">
+            <rect x="20" y="176" width="100" height="82" fill="#efe3c8"/><rect x="240" y="176" width="100" height="82" fill="#efe3c8"/>
+            <rect x="14" y="168" width="112" height="10" fill="#7a2236"/><rect x="234" y="168" width="112" height="10" fill="#7a2236"/>
+            <path class="win" d="M38 238V208a9 9 0 0 1 18 0V238Z"/><path class="win" d="M78 238V208a9 9 0 0 1 18 0V238Z"/>
+            <path class="win" d="M262 238V208a9 9 0 0 1 18 0V238Z"/><path class="win" d="M302 238V208a9 9 0 0 1 18 0V238Z"/>
+          </g>
+          <g class="part" style="--d:.25s">
+            <rect x="112" y="96" width="136" height="162" fill="#f6edd6"/>
+            <polygon points="104,98 180,46 256,98" fill="#7a2236"/>
+            <path d="M180 46V16M170 26H190" stroke="#f4d58a" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <circle cx="180" cy="80" r="14" fill="#ffe9b8" stroke="#7a2236" stroke-width="3"/>
+            <path d="M180 68V92M168 80H192" stroke="#7a2236" stroke-width="2" fill="none"/>
+            <rect x="150" y="102" width="60" height="20" rx="3" fill="#7a2236"/>
+            <text x="180" y="117" text-anchor="middle" font-family="Bodoni Moda,serif" font-size="13" font-weight="700" letter-spacing="2" fill="#ffe9b8">NDC</text>
+            <path class="win" d="M127 180V150a9 9 0 0 1 18 0V180Z"/><path class="win" d="M171 168V138a9 9 0 0 1 18 0V168Z"/><path class="win" d="M215 180V150a9 9 0 0 1 18 0V180Z"/>
+            <path d="M158 258V208a22 22 0 0 1 44 0V258Z" fill="#4a1a24"/>
+            <rect x="146" y="252" width="68" height="6" fill="#d8c8a2"/>
+          </g>
+        </svg>
+      </div>
+      <article class="info">
+        <p class="eyebrow">NDC · College</p>
+        <h3>Notre Dame College</h3>
+        <div class="big"><span data-to="2021" data-from="1980">2021</span><small>HSC · Passing year</small></div>
+        <ul class="stats">
+          <li><b>5.00</b><span>GPA</span></li>
+          <li><b>8th</b><span>Board merit position</span></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="stop flip" id="s4" aria-label="BRAC University">
+    <div class="row">
+      <div class="scene">
+        <svg viewBox="0 0 360 290" role="img" aria-label="Illustration of BRAC University">
+          <ellipse class="puff" cx="180" cy="262" rx="190" ry="16"/>
+          <g class="part" style="--d:0s"><ellipse cx="180" cy="266" rx="172" ry="11" fill="#000" opacity=".3"/></g>
+          <g class="part" style="--d:.05s">
+            <rect x="22" y="168" width="196" height="90" fill="#b0452e"/><rect x="16" y="160" width="208" height="10" fill="#2a2f3d"/>
+            <g data-grid="40,186,34,22,4,2,10,16"></g>
+            <path d="M82 160V148M142 160V148" stroke="#2a2f3d" stroke-width="3" fill="none"/>
+            <rect x="62" y="124" width="100" height="26" rx="3" fill="#fff"/>
+            <text x="112" y="143" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-size="17" font-weight="800" letter-spacing="1.5" fill="#b0452e">BRACU</text>
+          </g>
+          <g class="part" style="--d:.25s">
+            <rect x="206" y="64" width="124" height="194" fill="#2b3550"/><rect x="200" y="56" width="136" height="9" fill="#d9b673"/>
+            <g data-grid="218,78,26,24,3,4,8,10"></g>
+            <rect x="254" y="232" width="40" height="26" fill="#10131c"/>
+          </g>
+          <g class="part" style="--d:.55s">
+            <path d="M270 40L298 28L326 40L298 52Z" fill="#d9b673" stroke="#8c6a2a" stroke-width="1.5"/>
+            <path d="M282 47V56h32V47" fill="#b88f45"/>
+            <path d="M326 40V58" stroke="#fff" stroke-width="2" fill="none"/><circle cx="326" cy="60" r="3" fill="#fff"/>
+          </g>
+        </svg>
+      </div>
+      <article class="info">
+        <p class="eyebrow">BRACU · University</p>
+        <h3>BRAC University</h3>
+        <div class="big"><span data-to="2027" data-from="1990">2027</span><small>Graduating</small></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="finish" id="finish">
+    <i class="float a"></i><i class="float b"></i><i class="float c"></i><i class="float d"></i>
+    <div class="pin" id="pin">
+      <svg viewBox="0 0 80 80" width="100%" height="100%" aria-hidden="true">
+        <circle cx="40" cy="40" r="37" style="fill:var(--acc)"/>
+        <path d="M27 62V19" stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+        <g>
+          <rect x="30" y="20" width="10" height="9" fill="#fff"/><rect x="40" y="20" width="10" height="9" style="fill:var(--ink)"/><rect x="50" y="20" width="10" height="9" fill="#fff"/>
+          <rect x="30" y="29" width="10" height="9" style="fill:var(--ink)"/><rect x="40" y="29" width="10" height="9" fill="#fff"/><rect x="50" y="29" width="10" height="9" style="fill:var(--ink)"/>
+          <rect x="30" y="38" width="10" height="9" fill="#fff"/><rect x="40" y="38" width="10" height="9" style="fill:var(--ink)"/><rect x="50" y="38" width="10" height="9" fill="#fff"/>
+        </g>
+      </svg>
+    </div>
+    <div class="skills-head reveal">
+      <span class="eyebrow">Destination · 2026</span>
+      <h2>My <em>skills</em></h2>
+      <p>Two disciplines with one habit: build it well, then try to break it.</p>
+    </div>
+    <div class="panels">
+      <article class="panel web reveal">
+        <h3>Web development</h3>
+        <p>Fast, expressive interfaces and the systems that power them.</p>
+        <ul class="chips">
+          <li style="--k:0">Frontend engineering</li><li style="--k:1">Responsive design</li><li style="--k:2">Motion and interaction</li>
+          <li style="--k:3">Backend and APIs</li><li style="--k:4">Web performance</li>
+        </ul>
+      </article>
+      <article class="panel sec reveal">
+        <h3>Cyber security</h3>
+        <p>Finding the weak points before someone else does.</p>
+        <ul class="chips">
+          <li style="--k:0">Penetration testing</li><li style="--k:1">Vulnerability assessment</li><li style="--k:2">Network security</li>
+          <li style="--k:3">Secure coding</li><li style="--k:4">Threat analysis</li>
+        </ul>
+      </article>
+    </div>
+    <div class="marquee" aria-hidden="true">
+      <div>
+        <span class="f">Web development</span><span>Cyber security</span><span class="f">Web development</span><span>Cyber security</span>
+        <span class="f">Web development</span><span>Cyber security</span><span class="f">Web development</span><span>Cyber security</span>
+      </div>
+    </div>
+    <footer class="foot">
+      <span>Abdul Taowab · 2026</span>
+      <a href="#hero" id="top">Back to the start</a>
+    </footer>
+  </section>
+</main>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var world=$('#world'), svg=$('#roadsvg'), car=$('#car'), pRoad=$('#pRoad'), pEdge=$('#pEdge'), pGlow=$('#pGlow'), pDash=$('#pDash'), mp=$('#mp'), mask=$('#rm');
+  var stops=$$('.stop'), scenes=$$('.scene'), finish=$('#finish'), pin=$('#pin'), cue=$('#cue');
+  var ns='http://www.w3.org/2000/svg';
+
+  /* split the name into letters */
+  var li=0;
+  $$('.split').forEach(function(w){
+    var t=w.textContent; w.textContent='';
+    t.split('').forEach(function(ch){var s=document.createElement('span');s.className='l';s.style.setProperty('--i',li++);s.textContent=ch;s.setAttribute('aria-hidden','true');w.appendChild(s)});
+  });
+
+  /* window grids */
+  $$('[data-grid]').forEach(function(g){
+    var a=g.getAttribute('data-grid').split(',').map(Number), r=+(g.getAttribute('data-r')||2);
+    for(var j=0;j<a[5];j++)for(var i=0;i<a[4];i++){
+      var e=document.createElementNS(ns,'rect'); e.setAttribute('class','win');
+      e.setAttribute('x',a[0]+i*(a[2]+a[6])); e.setAttribute('y',a[1]+j*(a[3]+a[7])); e.setAttribute('width',a[2]); e.setAttribute('height',a[3]); e.setAttribute('rx',r); g.appendChild(e);
+    }
+  });
+  $$('.win').forEach(function(w,i){w.style.setProperty('--wd',(0.9+(i%9)*0.09+Math.random()*0.35).toFixed(2)+'s')});
+
+  /* photo */
+  var inp=$('#photo'), pframe=$('#frame');
+  function setPhoto(u){pframe.style.backgroundImage='url('+u+')';pframe.classList.add('has')}
+  setPhoto('assets/abdul-taowab.png');
+  try{var sv=localStorage.getItem('at-photo'); if(sv) setPhoto(sv)}catch(e){}
+  inp.addEventListener('change',function(){
+    var f=inp.files&&inp.files[0]; if(!f) return;
+    var r=new FileReader();
+    r.onload=function(){var im=new Image(); im.onload=function(){
+      var s=Math.min(1,720/Math.max(im.width,im.height)), c=document.createElement('canvas'); c.width=im.width*s; c.height=im.height*s;
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height); var u=c.toDataURL('image/jpeg',.85); setPhoto(u);
+      try{localStorage.setItem('at-photo',u)}catch(e){}
+    }; im.src=r.result};
+    r.readAsDataURL(f);
+  });
+
+  /* mood keyframes */
+  function col(s){ if(s.charAt(0)==='#'){var n=parseInt(s.slice(1),16);return [n>>16&255,n>>8&255,n&255,1]} var m=s.match(/[\d.]+/g).map(Number); return [m[0],m[1],m[2],m.length>3?m[3]:1]; }
+  var raw=[
+    [0,   {bg1:'#05060a',bg2:'#0b0d14',fg:'#f2ebdd',muted:'#a79e8c',card:'rgba(20,20,28,.58)',edge:'rgba(217,182,115,.30)',acc:'#d9b673',acc2:'#d9b673',road:'#15161c',dash:'#d9b673',ink:'#1a1406'}],
+    [.38, {bg1:'#0a1020',bg2:'#131f3a',fg:'#eef0f7',muted:'#9fadc9',card:'rgba(16,26,48,.60)',edge:'rgba(226,196,130,.30)',acc:'#e3c47f',acc2:'#7fd0d6',road:'#111a2e',dash:'#e3c47f',ink:'#1a1406'}],
+    [.68, {bg1:'#26427a',bg2:'#6b5f9e',fg:'#fff8ee',muted:'#d6d9ee',card:'rgba(32,40,88,.50)',edge:'rgba(255,214,150,.40)',acc:'#ffd48a',acc2:'#8ee3d6',road:'#1b2250',dash:'#ffd48a',ink:'#2a1c08'}],
+    [.84, {bg1:'#f4b894',bg2:'#8fd0ef',fg:'#1b2342',muted:'#46517a',card:'rgba(255,255,255,.62)',edge:'rgba(255,255,255,.75)',acc:'#e8452a',acc2:'#0f9a94',road:'#2b3358',dash:'#ffffff',ink:'#1b2342'}],
+    [1,   {bg1:'#ffd7a1',bg2:'#7fcdf2',fg:'#1b2342',muted:'#46517a',card:'rgba(255,255,255,.66)',edge:'rgba(255,255,255,.8)',acc:'#e8452a',acc2:'#0f9a94',road:'#2b3358',dash:'#ffffff',ink:'#1b2342'}]
+  ].map(function(k){var o={}; for(var n in k[1]) o[n]=col(k[1][n]); return [k[0],o]});
+  var names=Object.keys(raw[0][1]);
+  function sm(a,b,x){x=Math.max(0,Math.min(1,(x-a)/(b-a)));return x*x*(3-2*x)}
+  function moodAt(t){
+    var i=0; while(i<raw.length-2 && t>raw[i+1][0]) i++;
+    var a=raw[i], b=raw[i+1], k=sm(a[0],b[0],t), root=document.documentElement.style;
+    names.forEach(function(n){
+      var x=a[1][n], y=b[1][n], v=[0,1,2,3].map(function(j){return x[j]+(y[j]-x[j])*k});
+      root.setProperty('--'+n,'rgba('+Math.round(v[0])+','+Math.round(v[1])+','+Math.round(v[2])+','+v[3].toFixed(3)+')');
+    });
+    root.setProperty('--stars',(1-sm(.12,.52,t)).toFixed(3));
+    root.setProperty('--cloud',sm(.6,.84,t).toFixed(3));
+    root.setProperty('--sun',sm(.68,.95,t).toFixed(3));
+    root.setProperty('--beam',(1-sm(.58,.8,t)).toFixed(3));
+    return 1-sm(.12,.52,t);
+  }
+
+  /* road */
+  var W=0,H=0,L=1,N=1,cm=[],stopTop=[],stopH=[],worldTop=0,mobile=false,rw=70,pinY=0,carScale=1;
+  function catmull(p){
+    var d='M'+p[0][0].toFixed(1)+','+p[0][1].toFixed(1);
+    for(var i=0;i<p.length-1;i++){
+      var p0=p[i-1]||p[i], p1=p[i], p2=p[i+1], p3=p[i+2]||p2;
+      d+=' C'+(p1[0]+(p2[0]-p0[0])/6).toFixed(1)+','+(p1[1]+(p2[1]-p0[1])/6).toFixed(1)+' '+(p2[0]-(p3[0]-p1[0])/6).toFixed(1)+','+(p2[1]-(p3[1]-p1[1])/6).toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1);
+    }
+    return d;
+  }
+  function build(){
+    worldTop=world.getBoundingClientRect().top+window.scrollY;
+    W=world.clientWidth; H=world.scrollHeight; mobile=W<820; rw=mobile?34:72; carScale=mobile?.78:1.1;
+    var top=function(el){return el.getBoundingClientRect().top+window.scrollY-worldTop};
+    var bot=function(el){return el.getBoundingClientRect().bottom+window.scrollY-worldTop};
+    var y0=bot(cue)+(mobile?18:26);
+    var ys=scenes.map(function(s){return bot(s)+(mobile?24:46)});
+    pinY=top(pin)+pin.offsetHeight/2;
+    stopTop=stops.map(top); stopH=stops.map(function(s){return s.offsetHeight});
+    var A=mobile?22:42, fr=[.14,.38,.62,.86], yo=[0,1,-1,0].map(function(k){return k*A});
+    var xe=mobile?.93:.945, pts=[[W*.5,y0]], dir=-1, prev=y0;
+    ys.forEach(function(y){
+      pts.push([dir<0?W*xe:W*(1-xe),(prev+y)/2]);
+      var order=dir<0?[3,2,1,0]:[0,1,2,3];
+      order.forEach(function(k){pts.push([W*fr[k],y+yo[k]])});
+      prev=y; dir*=-1;
+    });
+    pts.push([dir<0?W*xe:W*(1-xe),(prev+pinY)/2]);
+    pts.push([W*(dir<0?.68:.32),pinY-(pinY-prev)*.2]);
+    pts.push([W*.5,pinY]);
+    var d=catmull(pts);
+    svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    mask.setAttribute('x',0); mask.setAttribute('y',0); mask.setAttribute('width',W); mask.setAttribute('height',H);
+    [mp,pRoad,pEdge,pGlow,pDash].forEach(function(p){p.setAttribute('d',d)});
+    mp.setAttribute('stroke-width',rw+60);
+    pRoad.setAttribute('stroke-width',rw); pEdge.setAttribute('stroke-width',rw+(mobile?5:8)); pGlow.setAttribute('stroke-width',rw+16);
+    pDash.setAttribute('stroke-width',mobile?2:3); pDash.setAttribute('stroke-dasharray',mobile?'10 12':'16 18');
+    L=pRoad.getTotalLength(); N=Math.max(50,Math.ceil(L/6)); cm=[]; var m=-1;
+    for(var i=0;i<=N;i++){var y=pRoad.getPointAtLength(L*i/N).y; if(y>m)m=y; cm.push(m)}
+    mp.setAttribute('stroke-dasharray',L);
+    onScroll(true);
+  }
+  function lenAtY(y){
+    if(y<=cm[0]) return 0; if(y>=cm[N]) return L;
+    var lo=0,hi=N; while(hi-lo>1){var mid=(lo+hi)>>1; if(cm[mid]<y)lo=mid; else hi=mid}
+    return L*(lo+(y-cm[lo])/Math.max(.001,cm[hi]-cm[lo]))/N;
+  }
+
+  var target=0,cur=0,t=0,lastT=-1,starOp=1,carY=0;
+  function onScroll(snap){
+    var max=Math.max(1,document.documentElement.scrollHeight-innerHeight);
+    t=Math.max(0,Math.min(1,window.scrollY/max));
+    target=lenAtY(window.scrollY+innerHeight*.72-worldTop);
+    if(snap===true && (reduce||cur===0)) cur=target;
+  }
+  function draw(){
+    var pt=pRoad.getPointAtLength(cur), a=pRoad.getPointAtLength(Math.max(0,cur-4)), b=pRoad.getPointAtLength(Math.min(L,cur+4));
+    var ang=Math.atan2(b.y-a.y,b.x-a.x)*180/Math.PI+90;
+    car.setAttribute('transform','translate('+pt.x.toFixed(1)+','+pt.y.toFixed(1)+') rotate('+ang.toFixed(1)+') scale('+carScale+')');
+    mp.setAttribute('stroke-dashoffset',(L-cur).toFixed(1));
+    car.classList.add('live');
+    carY=pt.y;
+    stops.forEach(function(s,i){ if(!s.classList.contains('on') && carY>=stopTop[i]+stopH[i]*.12) reveal(s) });
+    if(!finish.classList.contains('on') && carY>=pinY-90) finish.classList.add('on');
+  }
+  function reveal(s){
+    s.classList.add('on');
+    var n=$('.big span',s); if(!n) return;
+    var to=+n.dataset.to, from=+n.dataset.from;
+    if(reduce){n.textContent=to;return}
+    var t0=performance.now();
+    (function step(now){var k=Math.min(1,(now-t0)/1500), e=1-Math.pow(1-k,3); n.textContent=Math.round(from+(to-from)*e); if(k<1) requestAnimationFrame(step)})(t0);
+  }
+
+  /* stars */
+  var cv=$('#stars'), cx=cv.getContext('2d'), stars=[], dpr=1;
+  function sizeStars(){
+    dpr=Math.min(2,window.devicePixelRatio||1); cv.width=innerWidth*dpr; cv.height=innerHeight*dpr;
+    stars=[]; for(var i=0,n=Math.round(innerWidth*innerHeight/8000);i<n;i++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.3+.3,p:Math.random()*6.28,s:.4+Math.random()*1.3});
+  }
+  function drawStars(ts,op){
+    cx.clearRect(0,0,cv.width,cv.height); if(op<.02) return;
+    for(var i=0;i<stars.length;i++){
+      var s=stars[i], a=op*(.3+.7*(.5+.5*Math.sin(ts/1000*s.s+s.p)));
+      cx.fillStyle='rgba(255,244,220,'+a.toFixed(3)+')'; cx.beginPath(); cx.arc(s.x*cv.width,s.y*cv.height,s.r*dpr,0,6.283); cx.fill();
+    }
+  }
+
+  var prog=$('#prog');
+  function frame(ts){
+    cur+=(target-cur)*(reduce?1:.11); if(Math.abs(target-cur)<.4) cur=target;
+    draw();
+    if(Math.abs(t-lastT)>.0005){starOp=moodAt(t); lastT=t; prog.style.setProperty('--p',t.toFixed(4))}
+    drawStars(ts,starOp);
+    requestAnimationFrame(frame);
+  }
+
+  /* reveals for the skills section */
+  var rev=$$('.reveal');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+    rev.forEach(function(r){io.observe(r)});
+  } else rev.forEach(function(r){r.classList.add('in')});
+
+  $('#top').addEventListener('click',function(e){e.preventDefault();window.scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
+
+  addEventListener('scroll',function(){onScroll()},{passive:true});
+  var rt; addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){sizeStars();build()},120)});
+  if(window.ResizeObserver) new ResizeObserver(function(){clearTimeout(rt);rt=setTimeout(build,120)}).observe(world);
+  sizeStars(); build(); moodAt(0);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(build);
+  addEventListener('load',build);
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

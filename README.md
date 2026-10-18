@@ -1,6 +1,6 @@
 # Abdul Taowab — Portfolio
 
-A responsive, dependency-free portfolio with a scroll-drawn anime-inspired painted footpath, four distinct floating SVG campus illustrations, a paper-plane scroll guide, drifting clouds and fireflies, reveal animations, a shifting color palette, expandable skills, and optional synthesized ambient audio. Campus illustrations are artistic interpretations, not architectural reproductions.
+The supplied reference HTML is the website implementation, with its original layout, typography, animated road and car, campus assembly animations, counters, night-to-day colors, skills chips, and portrait chooser. The adaptations to the supplied HTML are loading the original local portrait by default and serving the same font families locally.
 
 Run from this directory:
 
@@ -8,6 +8,6 @@ Run from this directory:
 python3 -m http.server 3000 --bind 0.0.0.0
 ```
 
-Open the server in your development browser. No build or install step is required. Fonts use Google Fonts with local fallbacks. Reduced-motion preferences disable transitions and reveal effects.
+No installation or build is required. Styles, SVG illustrations, and JavaScript are embedded in `index.html`. The reference typefaces are served locally from `assets/fonts/` so no external font request is needed. Fontsource package versions, source URLs, verified SHA-512 package integrity, and licenses are included alongside the fonts. The reference includes reduced-motion styles.
 
-The original portrait is included locally at `assets/abdul-taowab.png`, sourced from the user's GitHub upload (commit `d03fb8e222ee3b47241bbd75c607652fbac50ed5`). It is displayed without image alteration, using a responsive CSS crop anchored at the top to keep the face visible. The monogram is hidden after the image loads successfully. BRAC University graduation is labeled expected 2027. No stock portrait, invented projects, or contact details are included.
+The original portrait is included at `assets/abdul-taowab.png`. Selecting a different portrait overrides it in that browser's local storage, as in the supplied reference. Clear the `at-photo` local storage entry to restore the default. BRAC University is listed as graduating in 2027.
