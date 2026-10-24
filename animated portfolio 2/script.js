@@ -49,7 +49,11 @@
       image.decoding = 'async';
       image.onload = async () => {
         try {
-          await image.decode();
+          // A loaded image is drawable even if a browser rejects explicit decoding.
+          if (typeof image.decode === 'function') {
+            await image.decode().catch(() => {});
+          }
+          if (!image.naturalWidth) throw new Error('Empty frame');
           frames.set(index, image);
           failures.delete(index);
           trimCache();
@@ -76,11 +80,6 @@
 
   function prefetch() {
     const current = Math.round(position);
-    if (reducedMotion.matches) {
-      queue = [0];
-      pumpQueue();
-      return;
-    }
     // Prioritize the playhead, the scroll destination, then nearby frames.
     // Rebuild the pending queue so a fast direction change discards stale requests.
     const wanted = new Set([current, target]);
@@ -111,16 +110,18 @@
     // Time-based easing behaves consistently on 60 Hz and 120 Hz screens.
     const delta = previousTime ? Math.min(time - previousTime, 64) : 16.67;
     previousTime = time;
-    position += (target - position) * (1 - Math.exp(-delta / 75));
+    // Reduced motion removes catch-up movement, but preserves deliberate scroll scrubbing.
+    if (reducedMotion.matches) position = target;
+    else position += (target - position) * (1 - Math.exp(-delta / 75));
     if (Math.abs(target - position) < 0.05) position = target;
     prefetch();
     const desired = Math.round(position);
     if (frames.has(desired)) {
       draw(desired);
-    } else if (lastDrawn < 0 && frames.size) {
-      // A restored scroll position may need a frame other than the poster first.
+    } else if (frames.size) {
+      // Advance with the nearest available frame while the exact frame is loading.
       const nearest = [...frames.keys()].sort((a, b) => Math.abs(a - desired) - Math.abs(b - desired))[0];
-      draw(nearest);
+      if (lastDrawn < 0 || Math.abs(nearest - desired) < Math.abs(lastDrawn - desired)) draw(nearest);
     }
     // Keep the last complete frame while the next image loads; never clear to black.
     if (position !== target) requestRender();
@@ -131,7 +132,7 @@
     const rect = sequence.getBoundingClientRect();
     const travel = Math.max(1, sequence.offsetHeight - viewport.clientHeight);
     const progress = Math.max(0, Math.min(1, -rect.top / travel));
-    const next = reducedMotion.matches ? 0 : Math.round(progress * (FRAME_COUNT - 1));
+    const next = Math.round(progress * (FRAME_COUNT - 1));
     if (next !== target) direction = next > target ? 1 : -1;
     target = next;
     requestRender();
@@ -152,11 +153,15 @@
   window.addEventListener('resize', resize);
   window.addEventListener('pageshow', resize);
   window.addEventListener('online', () => { failures.clear(); requestRender(); });
-  reducedMotion.addEventListener('change', () => {
-    if (reducedMotion.matches) position = 0;
+  const onMotionChange = () => {
     lastDrawn = -1;
     readScroll();
-  });
+  };
+  if (typeof reducedMotion.addEventListener === 'function') {
+    reducedMotion.addEventListener('change', onMotionChange);
+  } else if (typeof reducedMotion.addListener === 'function') {
+    reducedMotion.addListener(onMotionChange);
+  }
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
       cancelAnimationFrame(animationId);

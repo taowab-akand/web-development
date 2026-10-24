@@ -28,7 +28,3 @@ canvas {
   background: #0b0b0b url('./frames_1/frame_0001.jpg') center / contain no-repeat;
 }
 
-/* Keep the portrait still when the visitor requests reduced motion. */
-@media (prefers-reduced-motion: reduce) {
-  .sequence { height: 100vh; height: 100svh; }
-}
