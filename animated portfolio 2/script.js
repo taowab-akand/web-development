@@ -4,7 +4,6 @@
   const FRAME_COUNT = 240;
   const CACHE_LIMIT = 32;
   const CONCURRENT_LOADS = 4;
-  const sequence = document.querySelector('.sequence');
   const viewport = document.querySelector('.sequence__viewport');
   const canvas = document.querySelector('#sequence');
   const context = canvas.getContext('2d', { alpha: false });
@@ -204,10 +203,9 @@
   }
 
   function readScroll() {
-    const rect = sequence.getBoundingClientRect();
-    // Scrub within the hero's natural scroll distance; no empty multi-screen spacer.
-    const travel = Math.max(1, sequence.offsetHeight * 0.9);
-    const progress = Math.max(0, Math.min(1, -rect.top / travel));
+    // The entire document is the timeline: frame 1 at the top, frame 240 at the bottom.
+    const travel = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const progress = Math.max(0, Math.min(1, window.scrollY / travel));
     const next = progress * (FRAME_COUNT - 1);
     if (next !== target) direction = next > target ? 1 : -1;
     target = next;
@@ -230,6 +228,8 @@
   window.addEventListener('scroll', readScroll, { passive: true });
   window.addEventListener('resize', resize);
   window.addEventListener('pageshow', resize);
+  if ('ResizeObserver' in window) new ResizeObserver(readScroll).observe(document.querySelector('.site-content'));
+  document.querySelectorAll('.site-content img').forEach(image => image.addEventListener('load', readScroll));
   window.addEventListener('online', () => { failures.clear(); requestRender(); });
   const onMotionChange = () => {
     lastDrawn = -1;

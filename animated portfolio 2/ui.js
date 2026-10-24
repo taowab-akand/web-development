@@ -1,41 +1,39 @@
 (() => {
   'use strict';
 
-  const menu = document.querySelector('#menu-toggle');
-  const nav = document.querySelector('#primary-nav');
-  const closeMenu = () => {
-    nav.classList.remove('is-open');
-    menu.setAttribute('aria-expanded', 'false');
-    menu.setAttribute('aria-label', 'Open navigation');
+  const projects = {
+    veloce: { title: 'VELOCE BIKES', category: '01 / E-COMMERCE WEBSITE / CONCEPT', image: 'project-veloce.png', description: 'A performance-focused bicycle storefront concept. Expressive typography, an immersive product hero, and a clear shopping hierarchy give the product room to lead.', tags: ['Web design', 'E-commerce', 'Art direction'] },
+    woodcraft: { title: 'WOODCRAFT', category: '02 / FURNITURE WEBSITE / CONCEPT', image: 'project-woodcraft.png', description: 'A quiet furniture website concept built around natural materials and thoughtful craftsmanship. Warm neutrals, generous space, and tactile imagery create a considered digital showroom.', tags: ['UI/UX design', 'Visual identity', 'Digital showroom'] },
+    urbanic: { title: 'URBANIC', category: '03 / FASHION MAGAZINE / CONCEPT', image: 'project-urbanic.png', description: 'An editorial fashion concept with a bold point of view. A cinematic black-and-red palette meets confident layouts and expressive imagery for a memorable first impression.', tags: ['Editorial design', 'Fashion', 'Creative direction'] }
   };
-  menu.addEventListener('click', () => {
-    const open = menu.getAttribute('aria-expanded') !== 'true';
-    nav.classList.toggle('is-open', open);
-    menu.setAttribute('aria-expanded', String(open));
-    menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
-  });
-  nav.addEventListener('click', event => {
-    if (event.target.closest('a, button')) closeMenu();
-  });
-  document.addEventListener('click', event => {
-    if (!event.target.closest('.site-header')) closeMenu();
-  });
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') closeMenu();
-  });
-  const desktopMenu = window.matchMedia('(min-width: 441px)');
-  if (desktopMenu.addEventListener) desktopMenu.addEventListener('change', closeMenu);
-  else if (desktopMenu.addListener) desktopMenu.addListener(closeMenu);
 
   let lastOpener;
-  const openDialog = (dialog, opener) => {
-    document.querySelectorAll('dialog[open]').forEach(item => item.close());
+  function openDialog(dialog, opener) {
     if (!opener.closest('dialog')) lastOpener = opener;
+    document.querySelectorAll('dialog[open]').forEach(item => item.close());
     dialog.showModal();
     document.body.classList.add('dialog-open');
-  };
-  document.querySelectorAll('[data-dialog]').forEach(button => {
-    button.addEventListener('click', () => openDialog(document.getElementById(button.dataset.dialog), button));
+  }
+  document.querySelectorAll('[data-contact]').forEach(button => {
+    button.addEventListener('click', () => openDialog(document.querySelector('#contact-dialog'), button));
+  });
+  document.querySelectorAll('[data-project]').forEach(button => {
+    button.addEventListener('click', () => {
+      const data = projects[button.dataset.project];
+      const dialog = document.querySelector('#project-dialog');
+      document.querySelector('#project-title').textContent = data.title;
+      document.querySelector('#project-category').textContent = data.category;
+      document.querySelector('#project-description').textContent = data.description;
+      const image = dialog.querySelector('.dialog-project-image');
+      image.src = `./assets/${data.image}`;
+      image.alt = `${data.title} website concept`;
+      document.querySelector('#project-tags').replaceChildren(...data.tags.map(tag => {
+        const item = document.createElement('li');
+        item.textContent = tag;
+        return item;
+      }));
+      openDialog(dialog, button);
+    });
   });
   document.querySelectorAll('dialog').forEach(dialog => {
     dialog.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
@@ -46,66 +44,35 @@
     dialog.addEventListener('close', () => {
       if (!document.querySelector('dialog[open]')) {
         document.body.classList.remove('dialog-open');
-        if (lastOpener?.isConnected && !lastOpener.closest('dialog:not([open])')) lastOpener.focus({ preventScroll: true });
+        if (lastOpener?.isConnected) lastOpener.focus({ preventScroll: true });
       }
     });
   });
 
-  const projects = {
-    outer: {
-      category: '01 / Brand identity / Concept study',
-      title: 'Made for the outside.',
-      description: 'An exploration of an outdoor identity built around protection, movement, and everyday utility. A restrained palette lets tactile materials and a confident silhouette do the talking.',
-      tags: ['Brand strategy', 'Visual identity', 'Art direction'],
-      photo: 'photo-outer',
-      alt: 'Black puffer jacket hanging in a monochrome studio'
-    },
-    sound: {
-      category: '02 / Art direction / Concept study',
-      title: 'A different frequency.',
-      description: 'A visual world for a sound-first lifestyle concept. Expressive portraiture, sculptural hardware, and a quiet graphic language bring the listening experience into focus.',
-      tags: ['Creative direction', 'Digital experience', 'Photography concept'],
-      photo: 'photo-sound',
-      alt: 'Profile portrait wearing silver over-ear headphones'
-    },
-    ritual: {
-      category: '03 / Packaging design / Concept study',
-      title: 'Less, but considered.',
-      description: 'A minimal skincare packaging exploration inspired by daily rituals. Dark glass, honest textures, and purposeful proportions create a calm, considered presence.',
-      tags: ['Packaging design', 'Brand identity', 'Material exploration'],
-      photo: 'photo-ritual',
-      alt: 'Dark glass skincare bottle on a sculptural stone'
-    }
-  };
-  const projectDialog = document.querySelector('#project-dialog');
-  document.querySelectorAll('[data-project]').forEach(button => {
-    button.addEventListener('click', () => {
-      const project = projects[button.dataset.project];
-      document.querySelector('#project-category').textContent = project.category;
-      document.querySelector('#project-title').textContent = project.title;
-      document.querySelector('#project-description').textContent = project.description;
-      const photo = projectDialog.querySelector('.project-dialog-photo');
-      photo.className = `project-dialog-photo project-photo ${project.photo}`;
-      photo.setAttribute('aria-label', project.alt);
-      document.querySelector('#project-tags').replaceChildren(...project.tags.map(tag => {
-        const span = document.createElement('span');
-        span.textContent = tag;
-        return span;
-      }));
-      openDialog(projectDialog, button);
-    });
-  });
-
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.08, rootMargin: '0px 0px 25px 0px' });
-    document.querySelectorAll('.reveal').forEach(element => observer.observe(element));
-    document.body.classList.add('can-reveal');
+  const status = document.querySelector('.copy-status');
+  let statusTimeout;
+  function notify(message) {
+    clearTimeout(statusTimeout);
+    status.textContent = message;
+    status.classList.add('is-visible');
+    statusTimeout = setTimeout(() => status.classList.remove('is-visible'), 4500);
   }
+  document.querySelector('.copy-link').addEventListener('click', async () => {
+    const url = new URL(location.href);
+    url.hash = '';
+    try {
+      await navigator.clipboard.writeText(url.href);
+      notify('Portfolio link copied.');
+    } catch {
+      // A selectable link keeps the action useful on browsers without clipboard access.
+      status.replaceChildren(document.createTextNode('Portfolio link: '));
+      const link = document.createElement('a');
+      link.href = url.href;
+      link.textContent = url.href;
+      status.append(link);
+      status.style.pointerEvents = 'auto';
+      status.classList.add('is-visible');
+    }
+  });
+  document.querySelector('#year').textContent = new Intl.DateTimeFormat('en', { year: 'numeric', timeZone: 'Asia/Dhaka' }).format(new Date());
 })();
