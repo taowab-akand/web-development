@@ -1,0 +1,34 @@
+:root {
+  color-scheme: dark;
+  background: #0b0b0b;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; }
+
+body { overflow-x: clip; }
+
+/* Six viewport heights of scroll travel for the 240-frame sequence. */
+.sequence { height: 700vh; height: 700svh; }
+
+.sequence__viewport {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #0b0b0b url('./frames_1/frame_0001.jpg') center / contain no-repeat;
+}
+
+/* Keep the portrait still when the visitor requests reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .sequence { height: 100vh; height: 100svh; }
+}
