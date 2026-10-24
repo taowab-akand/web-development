@@ -9,8 +9,8 @@ html, body { margin: 0; }
 
 body { overflow-x: clip; }
 
-/* Six viewport heights of scroll travel for the 240-frame sequence. */
-.sequence { height: 700vh; height: 700svh; }
+/* Eight viewport heights of scroll travel for the 240-frame sequence. */
+.sequence { height: 900vh; height: 900svh; }
 
 .sequence__viewport {
   position: sticky;
@@ -19,12 +19,16 @@ body { overflow-x: clip; }
   height: 100vh;
   height: 100svh;
   overflow: hidden;
+  display: grid;
+  place-items: center;
 }
 
 canvas {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: min(100vw, calc(100vh * 16 / 9));
+  width: min(100vw, calc(100svh * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
   background: #0b0b0b url('./frames_1/frame_0001.jpg') center / contain no-repeat;
 }
 
