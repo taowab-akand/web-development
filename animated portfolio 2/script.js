@@ -205,7 +205,8 @@
 
   function readScroll() {
     const rect = sequence.getBoundingClientRect();
-    const travel = Math.max(1, sequence.offsetHeight - viewport.clientHeight);
+    // Scrub within the hero's natural scroll distance; no empty multi-screen spacer.
+    const travel = Math.max(1, sequence.offsetHeight * 0.9);
     const progress = Math.max(0, Math.min(1, -rect.top / travel));
     const next = progress * (FRAME_COUNT - 1);
     if (next !== target) direction = next > target ? 1 : -1;

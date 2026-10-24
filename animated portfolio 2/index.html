@@ -1,21 +1,82 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#0b0b0b">
-    <title>Animated Portfolio 2</title>
-    <link rel="preload" as="image" href="./frames_1/frame_0001.jpg">
-    <link rel="stylesheet" href="./style.css?v=3">
-    <script src="./script.js?v=3" defer></script>
-  </head>
-  <body>
-    <main class="sequence" aria-label="Scroll to animate the portrait; scroll up to reverse">
-      <div class="sequence__viewport">
-        <canvas id="sequence" role="img" aria-label="Animated portrait controlled by scrolling">
-          <img src="./frames_1/frame_0001.jpg" alt="Portrait of a man with sunglasses">
-        </canvas>
-      </div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101010">
+  <meta name="description" content="Folioblox — creative direction, thoughtful identities, and digital experiences. A portfolio made to move.">
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+  <title>Folioblox — Creative Direction & Design</title>
+  <link rel="preload" as="image" href="./frames_1/frame_0001.jpg">
+  <link rel="preload" as="font" type="font/ttf" href="./assets/manrope-variable.ttf" crossorigin>
+  <link rel="stylesheet" href="./style.css?v=4">
+  <script src="./script.js?v=4" defer></script>
+  <script src="./ui.js?v=4" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#about">Skip to content</a>
+  <div class="page-shell">
+    <main>
+      <section class="sequence hero" id="home" aria-labelledby="hero-title">
+        <div class="sequence__viewport" aria-hidden="true">
+          <canvas id="sequence"><img src="./frames_1/frame_0001.jpg" alt=""></canvas>
+          <div class="hero-shade"></div>
+        </div>
+        <header class="site-header">
+          <a class="wordmark" href="#home" aria-label="Folioblox home">Folioblox<span class="wordmark-dot">®</span></a>
+          <button class="menu-toggle" id="menu-toggle" aria-controls="primary-nav" aria-expanded="false" aria-label="Open navigation"><span></span><span></span></button>
+          <nav id="primary-nav" aria-label="Main navigation">
+            <a href="#home">Home</a><a href="#about">About</a><a href="#projects">Projects</a>
+            <button class="pill pill-light" data-dialog="contact-dialog">Get in touch <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>
+          </nav>
+        </header>
+        <div class="hero-content">
+          <div class="hero-heading"><p class="intro">Hey, I'm a</p><h1 id="hero-title">Creative<br>Director<span class="title-dot">.</span></h1></div>
+          <div class="hero-statement"><h2>Great design should<br>feel invisible.</h2><p>From logo to language, I build brands that connect and convert.</p></div>
+        </div>
+        <ol class="services" aria-label="Design services">
+          <li><span class="service-number"><i>#</i>01</span><span>Brand Strategy</span></li>
+          <li><span class="service-number"><i>#</i>02</span><span>Brand Identity Design</span></li>
+          <li><span class="service-number"><i>#</i>03</span><span>Packaging Design</span></li>
+          <li><span class="service-number"><i>#</i>04</span><span>Creative Direction</span></li>
+        </ol>
+      </section>
+
+      <section class="brand-band" aria-label="Illustrative brand identities">
+        <p class="brand-label">Built for brands<br> with a point of view.</p>
+        <div class="brand"><span class="brand-icon ring" aria-hidden="true"></span>Supa Blox</div>
+        <div class="brand"><svg class="brand-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 3h26v5L20 16l9 8v5H3v-5l9-8-9-8z" fill="currentColor"/></svg>Hype Blox</div>
+        <div class="brand"><span class="brand-icon split" aria-hidden="true"></span>Frame Blox</div>
+        <div class="brand brand-muted"><span class="brand-icon circles" aria-hidden="true"></span>Ultra Blox</div>
+      </section>
+
+      <section class="about-section" id="about" aria-labelledby="about-title">
+        <div class="about-heading reveal"><p class="eyebrow">Behind the Designs</p><h2 id="about-title">Shaping<br>Experiences That<br>Make Life Simpler</h2></div>
+        <div class="about-copy reveal"><p class="about-lead">I'm a product designer focused on building clean, intuitive interfaces that solve real-world problems.</p><div class="about-action"><p>Let's Build Something<br>Meaningful Together</p><button class="pill pill-orange" data-dialog="contact-dialog">Get in touch <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></div></div>
+      </section>
+
+      <section class="projects-section" id="projects" aria-label="Selected design concepts">
+        <div class="project-grid">
+          <button class="project-card reveal" data-project="outer" aria-label="View Outerwear concept project"><span class="project-photo photo-outer" role="img" aria-label="Black puffer jacket hanging in a monochrome studio"></span><span class="project-caption"><span><small>01 / Brand identity</small><strong>Made for the outside.</strong></span><span class="project-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>
+          <button class="project-card reveal" data-project="sound" aria-label="View Sound concept project"><span class="project-photo photo-sound" role="img" aria-label="Profile portrait wearing silver over-ear headphones"></span><span class="project-caption"><span><small>02 / Art direction</small><strong>A different frequency.</strong></span><span class="project-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>
+          <button class="project-card reveal" data-project="ritual" aria-label="View Ritual concept project"><span class="project-photo photo-ritual" role="img" aria-label="Dark glass skincare bottle on a sculptural stone"></span><span class="project-caption"><span><small>03 / Packaging design</small><strong>Less, but considered.</strong></span><span class="project-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span></button>
+        </div>
+        <div class="projects-footnote"><span>Selected explorations / Concept work</span><span>Thoughtfully made. From the inside out.</span></div>
+      </section>
     </main>
-  </body>
+    <footer><a class="wordmark" href="#home">Folioblox<span class="wordmark-dot">®</span></a><a href="https://github.com/taowab-akand" target="_blank" rel="noopener noreferrer">Find me on GitHub <span class="inline-arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a><a href="#home">Back to top <span class="inline-arrow up-arrow"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a></footer>
+  </div>
+
+  <dialog id="contact-dialog" class="contact-dialog" aria-labelledby="contact-title">
+    <button class="dialog-close" aria-label="Close contact dialog">×</button>
+    <p class="eyebrow">Something good starts here</p><h2 id="contact-title">Let's make<br>an impression.</h2>
+    <p>Have an idea worth bringing to life? Find me on GitHub to explore my work and connect.</p>
+    <a class="pill pill-orange" href="https://github.com/taowab-akand" target="_blank" rel="noopener noreferrer">Find me on GitHub <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></a>
+  </dialog>
+  <dialog id="project-dialog" class="project-dialog" aria-labelledby="project-title">
+    <button class="dialog-close" aria-label="Close project dialog">×</button>
+    <div class="project-dialog-photo project-photo" role="img" aria-label=""></div>
+    <div class="project-dialog-copy"><p class="eyebrow" id="project-category"></p><h2 id="project-title"></h2><p id="project-description"></p><div class="project-tags" id="project-tags"></div><button class="pill pill-orange" data-dialog="contact-dialog">Let's create something <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button></div>
+  </dialog>
+</body>
 </html>
