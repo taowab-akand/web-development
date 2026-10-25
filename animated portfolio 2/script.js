@@ -2,8 +2,11 @@
   'use strict';
 
   const FRAME_COUNT = 240;
-  const CACHE_LIMIT = 32;
-  const CONCURRENT_LOADS = 4;
+  const compact = window.matchMedia('(max-width: 1100px)').matches ||
+    (window.matchMedia('(pointer: coarse)').matches && window.matchMedia('(max-width: 1400px)').matches);
+  const saveData = Boolean(navigator.connection?.saveData);
+  const CACHE_LIMIT = compact ? 16 : 32;
+  const CONCURRENT_LOADS = compact ? 2 : 4;
   const viewport = document.querySelector('.sequence__viewport');
   const canvas = document.querySelector('#sequence');
   const context = canvas.getContext('2d', { alpha: false });
@@ -40,7 +43,7 @@
   }
 
   function pumpDownloads() {
-    while (activeDownloads < 6 && downloadQueue.length && !document.hidden) {
+    while (activeDownloads < (saveData ? 2 : compact ? 4 : 6) && downloadQueue.length && !document.hidden) {
       const { index, resolve, reject } = downloadQueue.shift();
       activeDownloads++;
       fetch(frameURL(index), { cache: 'force-cache' })
@@ -48,7 +51,12 @@
           if (!response.ok) throw new Error(`Frame ${index + 1}: HTTP ${response.status}`);
           return response.blob();
         })
-        .then(blob => { blobs.set(index, blob); resolve(blob); }, reject)
+        .then(blob => { blobs.set(index, blob);
+          if (saveData && blobs.size > 48) {
+            const distant = [...blobs.keys()].sort((a, b) => Math.abs(b - target) - Math.abs(a - target));
+            while (blobs.size > 48) blobs.delete(distant.shift());
+          }
+          resolve(blob); }, reject)
         .finally(() => {
           activeDownloads--;
           downloads.delete(index);
@@ -78,7 +86,11 @@
     // Evict frames furthest from the playhead, retaining the currently displayed image.
     const candidates = [...frames.keys()].filter((index) => index !== lastDrawn && index !== target)
       .sort((a, b) => Math.abs(b - position) - Math.abs(a - position));
-    while (frames.size > CACHE_LIMIT) frames.delete(candidates.shift());
+    while (frames.size > CACHE_LIMIT) {
+      const index = candidates.shift();
+      frames.get(index)?.close?.();
+      frames.delete(index);
+    }
   }
 
   function pumpQueue() {
@@ -95,6 +107,20 @@
     let objectURL;
     try {
       const blob = await getBlob(index);
+      // Keep a smaller decoded bitmap on handheld devices, with an Image fallback.
+      if (compact && typeof createImageBitmap === 'function') {
+        try {
+          const bitmap = await createImageBitmap(blob, {
+            resizeWidth: Math.min(1920, Math.max(640, canvas.width)),
+            resizeQuality: 'high'
+          });
+          frames.set(index, bitmap);
+          failures.delete(index);
+          trimCache();
+          finishLoad(index);
+          return;
+        } catch { /* Use the standard decoder on browsers without resize support. */ }
+      }
       objectURL = URL.createObjectURL(blob);
       const image = new Image();
       image.decoding = 'async';
@@ -140,18 +166,20 @@
     // Prioritize the playhead, the scroll destination, then nearby frames.
     // Rebuild the pending queue so a fast direction change discards stale requests.
     const wanted = new Set([Math.floor(position), Math.ceil(position), Math.round(target)]);
-    for (let offset = 1; offset <= 16; offset++) {
+    for (let offset = 1; offset <= (compact ? 9 : 16); offset++) {
       wanted.add(clamp(current + offset * direction));
-      if (offset <= 6) wanted.add(clamp(current - offset * direction));
+      if (offset <= (compact ? 3 : 6)) wanted.add(clamp(current - offset * direction));
     }
     queue = [...wanted];
     pumpQueue();
   }
 
   function paint(image, opacity) {
-    const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
-    const drawWidth = image.naturalWidth * scale;
-    const drawHeight = image.naturalHeight * scale;
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    const scale = Math.min(width / sourceWidth, height / sourceHeight);
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
     context.globalAlpha = opacity;
     context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
   }
@@ -216,7 +244,14 @@
     // A landscape 16:9 stage, fitted inside the viewport without cropping.
     width = Math.min(viewport.clientWidth, viewport.clientHeight * 16 / 9);
     height = width * 9 / 16;
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, compact ? 1.5 : 2);
+    const nextWidth = Math.round(width * pixelRatio);
+    const nextHeight = Math.round(height * pixelRatio);
+    if (canvas.width === nextWidth && canvas.height === nextHeight) { readScroll(); return; }
+    if (compact && (nextWidth > canvas.width * 1.25 || nextWidth < canvas.width * 0.7)) {
+      frames.forEach(image => image.close?.());
+      frames.clear();
+    }
     canvas.width = Math.round(width * pixelRatio);
     canvas.height = Math.round(height * pixelRatio);
     context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
@@ -251,7 +286,7 @@
 
   resize();
   // Warm all 240 compressed frames in the background. The playhead gets priority.
-  for (let index = 0; index < FRAME_COUNT; index++) {
+  for (let index = 0; !saveData && index < FRAME_COUNT; index++) {
     getBlob(index, false).catch(() => {});
   }
 })();

@@ -2,9 +2,9 @@
   'use strict';
 
   const projects = {
-    veloce: { title: 'VELOCE BIKES', category: '01 / E-COMMERCE WEBSITE / CONCEPT', image: 'project-veloce.png', description: 'A performance-focused bicycle storefront concept. Expressive typography, an immersive product hero, and a clear shopping hierarchy give the product room to lead.', tags: ['Web design', 'E-commerce', 'Art direction'] },
-    woodcraft: { title: 'WOODCRAFT', category: '02 / FURNITURE WEBSITE / CONCEPT', image: 'project-woodcraft.png', description: 'A quiet furniture website concept built around natural materials and thoughtful craftsmanship. Warm neutrals, generous space, and tactile imagery create a considered digital showroom.', tags: ['UI/UX design', 'Visual identity', 'Digital showroom'] },
-    urbanic: { title: 'URBANIC', category: '03 / FASHION MAGAZINE / CONCEPT', image: 'project-urbanic.png', description: 'An editorial fashion concept with a bold point of view. A cinematic black-and-red palette meets confident layouts and expressive imagery for a memorable first impression.', tags: ['Editorial design', 'Fashion', 'Creative direction'] }
+    veloce: { title: 'VELOCE BIKES', category: '01 / E-COMMERCE WEBSITE / CONCEPT', image: 'project-veloce.webp', description: 'A performance-focused bicycle storefront concept. Expressive typography, an immersive product hero, and a clear shopping hierarchy give the product room to lead.', tags: ['Web design', 'E-commerce', 'Art direction'] },
+    woodcraft: { title: 'WOODCRAFT', category: '02 / FURNITURE WEBSITE / CONCEPT', image: 'project-woodcraft.webp', description: 'A quiet furniture website concept built around natural materials and thoughtful craftsmanship. Warm neutrals, generous space, and tactile imagery create a considered digital showroom.', tags: ['UI/UX design', 'Visual identity', 'Digital showroom'] },
+    urbanic: { title: 'URBANIC', category: '03 / FASHION MAGAZINE / CONCEPT', image: 'project-urbanic.webp', description: 'An editorial fashion concept with a bold point of view. A cinematic black-and-red palette meets confident layouts and expressive imagery for a memorable first impression.', tags: ['Editorial design', 'Fashion', 'Creative direction'] }
   };
 
   let lastOpener;
