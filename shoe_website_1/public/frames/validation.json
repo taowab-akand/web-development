@@ -1,0 +1,89 @@
+{
+  "source": "shoe_frames_24fps_github.zip",
+  "frame_count": 239,
+  "decoded_original_frames": 221,
+  "original_dimensions": [
+    1920,
+    1080
+  ],
+  "mobile_dimensions": [
+    800,
+    450
+  ],
+  "source_checksums_verified": true,
+  "zero_byte_replacements": [
+    {
+      "frame": 37,
+      "source_frame": 36
+    },
+    {
+      "frame": 38,
+      "source_frame": 36
+    },
+    {
+      "frame": 39,
+      "source_frame": 41
+    },
+    {
+      "frame": 40,
+      "source_frame": 41
+    },
+    {
+      "frame": 57,
+      "source_frame": 56
+    },
+    {
+      "frame": 58,
+      "source_frame": 56
+    },
+    {
+      "frame": 59,
+      "source_frame": 61
+    },
+    {
+      "frame": 60,
+      "source_frame": 61
+    },
+    {
+      "frame": 77,
+      "source_frame": 76
+    },
+    {
+      "frame": 78,
+      "source_frame": 76
+    },
+    {
+      "frame": 79,
+      "source_frame": 81
+    },
+    {
+      "frame": 80,
+      "source_frame": 81
+    },
+    {
+      "frame": 161,
+      "source_frame": 160
+    },
+    {
+      "frame": 162,
+      "source_frame": 163
+    },
+    {
+      "frame": 187,
+      "source_frame": 186
+    },
+    {
+      "frame": 189,
+      "source_frame": 188
+    },
+    {
+      "frame": 190,
+      "source_frame": 191
+    },
+    {
+      "frame": 215,
+      "source_frame": 214
+    }
+  ],
+  "repair_policy": "Each zero-byte source entry is replaced by its nearest valid original frame. Ties select preceding frame."
+}

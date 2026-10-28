@@ -1,0 +1,12 @@
+import {build as viteBuild} from 'vite';
+import {build} from 'esbuild';
+import {mkdir,copyFile,writeFile,readFile,cp} from 'node:fs/promises';
+await viteBuild();
+await mkdir('dist/server',{recursive:true});
+await mkdir('dist/.openai',{recursive:true});
+await build({entryPoints:['worker/index.js'],bundle:true,format:'esm',platform:'browser',target:'es2022',outfile:'dist/server/index.js',minify:true});
+const manifest=JSON.parse(await readFile('.openai/hosting.json','utf8'));
+await copyFile('.openai/hosting.json','dist/.openai/hosting.json');
+await cp('drizzle','dist/drizzle',{recursive:true});
+await writeFile('dist/server/wrangler.json',JSON.stringify({name:'aerform-shoe-studio',main:'index.js',compatibility_date:'2026-10-01',assets:{directory:'../client',binding:'ASSETS',not_found_handling:'single-page-application',run_worker_first:['/api/*']},d1_databases:[{binding:'DB',database_name:'aerform-store',database_id:'local-aerform',migrations_dir:'../../drizzle'}]},null,2));
+console.log('AERFORM Worker, client assets, and schema packaged.');

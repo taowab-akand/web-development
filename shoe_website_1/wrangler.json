@@ -1,0 +1,1 @@
+{"name":"aerform-shoe-studio","main":"worker/index.js","compatibility_date":"2026-10-01","assets":{"directory":"dist/client","binding":"ASSETS","not_found_handling":"single-page-application","run_worker_first":["/api/*"]},"d1_databases":[{"binding":"DB","database_name":"aerform-store","database_id":"local-aerform","migrations_dir":"drizzle"}]}
