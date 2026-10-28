@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "description": "Original procedural garments and cotton textures; no downloaded garment meshes or embedded reference sheet.",
+  "license": "MIT",
+  "geometryGenerator": "src/scene/garmentGeometry.ts",
+  "textureGenerator": "src/scene/garmentTextures.ts",
+  "products": [
+    {
+      "id": "lunar-tee",
+      "geometry": "procedural-short-sleeve",
+      "color": "#41413e",
+      "frontArtwork": "moon-and-stars",
+      "backArtwork": "small-crescent"
+    },
+    {
+      "id": "midnight-long-sleeve",
+      "geometry": "procedural-long-sleeve",
+      "color": "#314b3b",
+      "frontArtwork": "moon-and-stars",
+      "backArtwork": "small-crescent"
+    },
+    {
+      "id": "essential-tee",
+      "geometry": "procedural-short-sleeve",
+      "color": "#e8dfc9",
+      "frontArtwork": null,
+      "backArtwork": null
+    }
+  ],
+  "replacementNotes": "Replace the procedural mesh construction in Garment with licensed GLB geometry retaining the shoulder origin y=0 and hem y=-2.04. Keep product IDs stable. Runtime textures are independently generated front and back cotton maps."
+}
