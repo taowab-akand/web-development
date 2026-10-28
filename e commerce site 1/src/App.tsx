@@ -426,6 +426,7 @@ export default function App() {
                 Math.abs(dx) > Math.abs(dy) * 1.2
               ) {
                 p.intent = true;
+                if (inspectionRef.current === "browse") controller.current.dragging = true;
                 p.moved = true;
                 e.currentTarget.setPointerCapture(e.pointerId);
               }

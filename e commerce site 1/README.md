@@ -48,3 +48,7 @@ These are original procedural cloth shells with rounded volume and open neck/hem
 The supplied 10.7-second video was inspected at one-second intervals, including the browsing, green-shirt inspection, and return-to-rack segments. Motion is inferred from those observations; this implementation does not claim the original algorithm. Camera filming movement, the laptop, browser chrome, hand, and social overlays are excluded.
 
 Performance uses capped DPR 1–1.5 with a one-time reduction to DPR 1 when initial frames are slow, shared per-product assets, inexpensive lighting, no postprocessing, and GPU resource disposal. Real-device 60 fps is a target, not a measured guarantee. Browser verification uses software-rendered Chromium; physical touch/trackpad and hardware GPU performance require device testing. See `docs/verification.md` for the actual checks performed.
+
+## Recorded demo
+
+[Watch the browsing and inspection demo](docs/demo-2x.mp4). This is a 17-second recording played at 2× speed, captured in software-rendered Chromium. It demonstrates green-shirt selection, front/back inspection, and returning to the same rack; it is not an FPS benchmark.

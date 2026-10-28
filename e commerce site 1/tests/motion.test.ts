@@ -110,3 +110,17 @@ test("reduced motion suppresses overshoot and inertia", () => {
   }
   assert.equal(rack.q, 1);
 });
+
+
+test("holding a drag preserves a fractional target until release", () => {
+  const rack = new RackMotion(3);
+  rack.dragging = true;
+  rack.input(0.36, 0);
+  advance(rack, 2);
+  assert.ok(Math.abs(rack.q - 0.36) < 0.001);
+  assert.equal(rack.target, 0.36);
+  rack.release(0, 2100);
+  advance(rack, 2, 2100);
+  assert.equal(rack.target, 0);
+  assert.ok(rack.q < 0.001);
+});

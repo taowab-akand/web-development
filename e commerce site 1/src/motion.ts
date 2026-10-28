@@ -25,6 +25,7 @@ export class RackMotion {
   velocity = 0;
   acceleration = 0;
   lastInput = -Infinity;
+  dragging = false;
   count: number;
   reducedMotion = false;
   private momentum = 0;
@@ -42,6 +43,7 @@ export class RackMotion {
   }
 
   setCount(count: number, selectedIndex?: number) {
+    this.dragging = false;
     this.count = Math.max(0, Math.floor(count));
     if (selectedIndex !== undefined) {
       this.q = this.target = clamp(selectedIndex, 0, this.max);
@@ -94,6 +96,7 @@ export class RackMotion {
   }
 
   release(velocity: number, now = clock()) {
+    this.dragging = false;
     this.lastInput = now;
     this.momentum =
       this.reducedMotion || !Number.isFinite(velocity)
@@ -117,7 +120,7 @@ export class RackMotion {
     const elapsed = Math.min(dt, 0.05);
     const steps = Math.max(1, Math.ceil(elapsed / (1 / 120)));
     const h = elapsed / steps;
-    const idle = now - this.lastInput > MOTION.snapIdleMs;
+    const idle = !this.dragging && now - this.lastInput > MOTION.snapIdleMs;
     for (let i = 0; i < steps; i++) {
       if (idle) {
         this.target = Math.round(this.target);

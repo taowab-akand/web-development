@@ -2,7 +2,7 @@
 
 ## Automated controller checks
 
-`npm test` passes nine tests: fractional high-resolution input accumulation, immediate reversal, idle snap/settlement, release momentum, finite boundaries, empty/single collections, background-tab delta stability, shared intermediate garment turns, and monotonic reduced-motion navigation.
+`npm test` passes ten tests: fractional high-resolution input accumulation, immediate reversal, idle snap/settlement, release momentum, finite boundaries, empty/single collections, background-tab delta stability, shared intermediate garment turns, monotonic reduced-motion navigation, and preserving fractional positions while a drag is held.
 
 `npm run build` passes TypeScript and the production Vite build.
 
@@ -21,3 +21,5 @@ The follow-up browser pass passed keyboard selection of the green long sleeve, c
 Inspected frames across the entire supplied 10.7-second reference, including green-shirt selection, isolation, and return. Compared the implementation's captured browsing/inspection sequence: the same fixed rail and continuous sliding/turning concept is implemented. The movement is inferred, not the original site's algorithm; proportions, materials, fold drape, lighting and timing differ.
 
 No physical trackpad, multi-touch device, Safari/Firefox, or hardware GPU performance benchmark was available. Automated mouse dragging and emulated phone taps do not verify native finger gesture feel or pinch zoom on hardware. Real-device 60 fps is not claimed. The optional demo uses software-rendered Chromium, so recording speed is not a hardware performance measurement.
+
+A final touch-input review added an explicit drag-held state: idle snapping waits for pointer release, so holding a garment midway does not pull it away from the finger. Synthetic vertical touch pan scrolls the page. Native multi-touch/pinch remains a hardware verification limit.
