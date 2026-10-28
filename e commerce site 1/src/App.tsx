@@ -14,6 +14,8 @@ import {
   type StudioSettings,
 } from "./products";
 import { RackScene, type Inspection } from "./scene/RackScene";
+import { loadCatalog } from "./api";
+import { ShopPanels } from "./ShopPanels";
 
 const Arrow = ({ right = false }: { right?: boolean }) => (
   <svg
@@ -147,15 +149,51 @@ function Choices<T extends string>({
 }
 export default function App() {
   const [settings, setSettings] = useState<StudioSettings>({ ...defaults });
+  const [uploads, setUploads] = useState<Product[]>([]);
+  const [catalogError, setCatalogError] = useState("");
+  const [panel, setPanel] = useState<"admin" | "cart" | null>(null);
+  useEffect(() => {
+    if (!panel) return;
+    const esc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setPanel(null);
+    };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [panel]);
+  const [cart, setCartState] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("moonlight-cart") || "[]");
+    } catch {
+      return [];
+    }
+  });
+  const setCart = (next: string[]) => {
+    setCartState(next);
+    localStorage.setItem("moonlight-cart", JSON.stringify(next));
+  };
+  const allProducts = useMemo(() => [...products, ...uploads], [uploads]);
+  const refreshCatalog = async () => {
+    try {
+      setUploads(await loadCatalog());
+      setCatalogError("");
+    } catch {
+      setCatalogError(
+        "New garments will appear here when catalog access is enabled.",
+      );
+    }
+  };
+  useEffect(() => {
+    void refreshCatalog();
+  }, []);
   const filtered = useMemo(
     () =>
-      products.filter(
+      allProducts.filter(
         (p) =>
           settings.collection === "all" || p.category === settings.collection,
       ),
-    [settings.collection],
+    [settings.collection, allProducts],
   );
-  const controller = useRef(new RackMotion(products.length));
+  const controller = useRef(new RackMotion(allProducts.length));
   const [selected, setSelected] = useState(0);
   const selectedId = useRef(products[0].id);
   const [inspection, setInspection] = useState<Inspection>("browse");
@@ -348,20 +386,45 @@ export default function App() {
             moonlight<span className="wordmark-star">®</span>
           </span>
         </a>
-        <nav aria-label="Main navigation">
-          <a className="nav-active" href="#studio">
-            The rack <span>03</span>
-          </a>
-          <a href="#collection-notes">The collection</a>
+        <nav aria-label="Main navigation" className="main-nav">
+          <button
+            className={settings.collection === "all" ? "nav-active" : ""}
+            onClick={() => update("collection", "all")}
+          >
+            All pieces
+          </button>
+          <button
+            className={settings.collection === "shirts" ? "nav-active" : ""}
+            onClick={() => update("collection", "shirts")}
+          >
+            Shirts
+          </button>
+          <button
+            className={settings.collection === "tees" ? "nav-active" : ""}
+            onClick={() => update("collection", "tees")}
+          >
+            T-shirts
+          </button>
         </nav>
-        <button className="text-button" onClick={() => setHelp(true)}>
-          How to explore{" "}
-          <span>
-            <Diagonal />
-          </span>
-        </button>
+        <div className="header-actions">
+          <button className="text-button" onClick={() => setPanel("admin")}>
+            Admin
+          </button>
+          <button
+            className="cart-button"
+            onClick={() => setPanel("cart")}
+            aria-label={`Cart, ${cart.length} items`}
+          >
+            Cart <span>{cart.length}</span>
+          </button>
+        </div>
       </header>
       <main id="studio">
+        {catalogError && (
+          <p className="catalog-error" role="status">
+            {catalogError}
+          </p>
+        )}
         <div className="page-title">
           <div>
             <div className="eyebrow">
@@ -372,7 +435,7 @@ export default function App() {
             </h1>
           </div>
           <p>
-            Three everyday pieces. A different perspective.
+            Everyday pieces. A different perspective.
             <br />
             Meet the Moonlight collection in motion.
           </p>
@@ -426,7 +489,8 @@ export default function App() {
                 Math.abs(dx) > Math.abs(dy) * 1.2
               ) {
                 p.intent = true;
-                if (inspectionRef.current === "browse") controller.current.dragging = true;
+                if (inspectionRef.current === "browse")
+                  controller.current.dragging = true;
                 p.moved = true;
                 e.currentTarget.setPointerCapture(e.pointerId);
               }
@@ -550,7 +614,7 @@ export default function App() {
             >
               <span className="product-number">
                 {product?.number ?? "—"}
-                <span> / 03</span>
+                <span> / {String(filtered.length).padStart(2, "0")}</span>
               </span>
               <span
                 className="product-swatch"
@@ -566,6 +630,13 @@ export default function App() {
               </div>
             </div>
             <div className="product-actions">
+              <button
+                className="cart-add"
+                disabled={!product}
+                onClick={() => product && setCart([...cart, product.id])}
+              >
+                Add to cart
+              </button>
               <button
                 className="inspect-button"
                 onClick={inspect}
@@ -625,7 +696,7 @@ export default function App() {
               items={[
                 ["all", "All pieces"],
                 ["tees", "T-shirts"],
-                ["long-sleeves", "Long sleeve"],
+                ["shirts", "Shirts"],
                 ["archive", "Archive"],
               ]}
               onChange={(v) => update("collection", v)}
@@ -710,6 +781,16 @@ export default function App() {
           </button>
         </footer>
       </main>
+      {panel && (
+        <ShopPanels
+          view={panel}
+          products={allProducts}
+          cart={cart}
+          setCart={setCart}
+          onCatalogChanged={refreshCatalog}
+          onClose={() => setPanel(null)}
+        />
+      )}
       <dialog
         ref={helpRef}
         className="help-dialog"

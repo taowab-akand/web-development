@@ -900,3 +900,241 @@ footer .text-button {
   vertical-align: middle;
   display: inline-block;
 }
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #f5e9df;
+  margin: 0 -2px;
+  padding: 0 2px;
+  box-shadow: 0 5px 15px #f5e9df;
+}
+.main-nav button {
+  background: transparent;
+  font-size: 12px;
+  color: #796f77;
+  padding: 10px 0;
+}
+.main-nav button.nav-active {
+  color: #242133;
+  border-bottom: 1px solid #242133;
+}
+.header-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.cart-button {
+  font-size: 12px;
+  background: #24223f;
+  color: #f5e9df;
+  border-radius: 22px;
+  padding: 10px 16px;
+}
+.cart-button span {
+  font-size: 10px;
+  background: #f5e9df;
+  color: #24223f;
+  border-radius: 50%;
+  padding: 2px 6px;
+  margin-left: 6px;
+}
+.cart-add {
+  font-size: 10px;
+  background: #f2e5ce;
+  color: #302942;
+  border-radius: 22px;
+  padding: 9px 13px;
+  white-space: nowrap;
+}
+.catalog-error {
+  font-size: 11px;
+  color: #824a4a;
+  margin: 10px 0;
+}
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #1814259c;
+  display: flex;
+  justify-content: flex-end;
+}
+.side-panel {
+  width: min(420px, 100vw);
+  height: 100%;
+  overflow: auto;
+  background: #f5e9df;
+  color: #242133;
+  padding: 25px 28px 45px;
+  box-shadow: -20px 0 60px #1a172744;
+}
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.panel-head button,
+.panel-list button,
+.panel-logout {
+  background: transparent;
+  color: #6d606d;
+}
+.side-panel h2 {
+  font-family: Georgia, serif;
+  font-size: 32px;
+  font-weight: 400;
+  margin: 35px 0 24px;
+}
+.side-panel h2 span {
+  font:
+    16px "DM Sans Variable",
+    sans-serif;
+}
+.side-panel h3 {
+  font-size: 13px;
+  margin: 34px 0 12px;
+}
+.panel-note {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #766b73;
+}
+.panel-form {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+.panel-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.panel-form input,
+.panel-form select {
+  font: inherit;
+  padding: 11px 12px;
+  border: 1px solid #cbbfc3;
+  background: #fffaf5;
+  border-radius: 7px;
+  min-height: 44px;
+  color: #242133;
+}
+.panel-form input[type="color"] {
+  padding: 4px;
+  width: 80px;
+}
+.panel-form input[type="file"] {
+  width: 100%;
+  font-size: 11px;
+}
+.panel-primary {
+  background: #25213d;
+  color: #fff8ef;
+  padding: 13px;
+  border-radius: 24px;
+  margin-top: 6px;
+}
+.panel-primary:disabled {
+  opacity: 0.5;
+}
+.panel-list {
+  list-style: none;
+  margin: 15px 0;
+  padding: 0;
+}
+.panel-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid #3021321f;
+}
+.panel-list li > div {
+  flex: 1;
+  display: grid;
+  gap: 5px;
+}
+.panel-list strong {
+  font-size: 12px;
+}
+.panel-list small {
+  font-size: 10px;
+  color: #7e727c;
+}
+.panel-list img {
+  width: 42px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.cart-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.panel-list button {
+  font-size: 11px;
+  text-decoration: underline;
+}
+.panel-error {
+  color: #a1263b;
+  font-size: 12px;
+}
+.panel-success {
+  color: #326e44;
+  font-size: 12px;
+}
+.upload-preview {
+  width: 90px;
+  height: 110px;
+  object-fit: contain;
+  background: #e5dddc;
+}
+.panel-logout {
+  font-size: 11px;
+  text-decoration: underline;
+}
+@media (max-width: 650px) {
+  .site-header {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 72px;
+    padding: 12px 0;
+    gap: 6px;
+  }
+  .main-nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 30px !important;
+  }
+  .main-nav button {
+    font-size: 11px;
+  }
+  .header-actions {
+    gap: 10px;
+  }
+  .header-actions .text-button {
+    font-size: 10px;
+  }
+  .cart-button {
+    font-size: 10px;
+    padding: 8px 11px;
+  }
+  .cart-add {
+    font-size: 0;
+    padding: 9px;
+  }
+  .cart-add:after {
+    content: "+";
+    font-size: 17px;
+  }
+  .product-actions {
+    gap: 5px;
+  }
+  .side-panel {
+    padding: 22px;
+  }
+}

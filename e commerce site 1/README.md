@@ -52,3 +52,13 @@ Performance uses capped DPR 1–1.5 with a one-time reduction to DPR 1 when init
 ## Recorded demo
 
 [Watch the browsing and inspection demo](docs/demo-2x.mp4). This is a 17-second recording played at 2× speed, captured in software-rendered Chromium. It demonstrates green-shirt selection, front/back inspection, and returning to the same rack; it is not an FPS benchmark.
+
+## Admin, catalog, and cart
+
+The sticky header now includes Shirt and T-shirt filters, an Admin button, and a cart. The cart is saved locally in each visitor's browser; there is no checkout or payment flow.
+
+`api/` is the separate Sites Worker for the shared garment catalog. It stores uploaded image files and product metadata in R2. The admin password is configured as a hosted secret, not bundled in client code. The login endpoint issues an eight-hour signed admin token, and upload/delete routes verify it server-side. The provided login uses `admin123` for both username and password. Change the password in the hosted secret before real commercial use.
+
+An uploaded image is fitted to the front textile surface of the existing procedural 3D shirt or T-shirt shape. The back uses a matching fabric color. This creates a rotatable volumetric garment from a photo, but does not reconstruct unseen drape, seams, or a unique 3D scan from one image. PNG, JPEG, and WebP files up to 4 MB are accepted.
+
+The catalog API must allow public GET access for customers to see uploads across devices. Its admin endpoints remain protected by server-side authentication. The API Site currently has private access because automatic approval review rejected making a separate admin-capable backend public. Until that access change is explicitly approved, the live front end can show its new controls but cannot load or upload shared garments. The source and UI are ready for that final access step.

@@ -1,13 +1,14 @@
 export type Product = {
   id: string;
   name: string;
-  category: "tees" | "long-sleeves";
+  category: "tees" | "shirts";
   color: string;
   colorName: string;
   fabric: string;
   printed: boolean;
   longSleeve: boolean;
   number: string;
+  imageUrl?: string;
 };
 export const products: Product[] = [
   {
@@ -24,7 +25,7 @@ export const products: Product[] = [
   {
     id: "midnight-long-sleeve",
     name: "Midnight Long Sleeve",
-    category: "long-sleeves",
+    category: "shirts",
     color: "#314b3b",
     colorName: "Forest green",
     fabric: "260 GSM · 100% cotton",
@@ -46,7 +47,7 @@ export const products: Product[] = [
 ];
 export type StudioSettings = {
   background: "neon" | "studio" | "dawn" | "forest";
-  collection: "all" | "tees" | "long-sleeves" | "archive";
+  collection: "all" | "tees" | "shirts" | "archive";
   rail: "gold" | "chrome" | "black" | "wood";
   hanger: "chrome" | "gold" | "wood";
   click: "inspect" | "select";

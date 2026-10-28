@@ -10,7 +10,7 @@ import * as THREE from "three";
 import { garmentPose, MOTION, type RackMotion } from "../motion";
 import type { Product, StudioSettings } from "../products";
 import { buildGarmentGeometry } from "./garmentGeometry";
-import { createFabricTextures } from "./garmentTextures";
+import { createFabricTextures, loadCustomFabricMap } from "./garmentTextures";
 export type Inspection =
   "browse" | "entering-inspect" | "inspect" | "exiting-inspect";
 type Props = {
@@ -146,6 +146,30 @@ function Garment({
       }),
     [back],
   );
+  useEffect(() => {
+    if (!product.imageUrl) return;
+    let active = true;
+    let custom: THREE.CanvasTexture | null = null;
+    loadCustomFabricMap(front.map, product.imageUrl)
+      .then((texture) => {
+        if (!active) {
+          texture.dispose();
+          return;
+        }
+        custom = texture;
+        cloth.map = texture;
+        cloth.needsUpdate = true;
+      })
+      .catch(() => {
+        /* keep matching fabric when an uploaded image cannot load */
+      });
+    return () => {
+      active = false;
+      cloth.map = front.map;
+      cloth.needsUpdate = true;
+      custom?.dispose();
+    };
+  }, [product.imageUrl, front, cloth]);
   const seam = useMemo(
     () =>
       new THREE.MeshStandardMaterial({

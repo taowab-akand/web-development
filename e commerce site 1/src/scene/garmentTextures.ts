@@ -165,3 +165,59 @@ export function createFabricTextures(
     roughnessMap: makeTexture(rough),
   };
 }
+
+/** Fit an uploaded front photo to the curved textile shell, suppressing a plain photo background. */
+export async function loadCustomFabricMap(
+  base: THREE.CanvasTexture,
+  url: string,
+): Promise<THREE.CanvasTexture> {
+  const photo = new Image();
+  photo.crossOrigin = "anonymous";
+  photo.src = url;
+  await photo.decode();
+  const source = document.createElement("canvas");
+  source.width = 640;
+  source.height = 760;
+  const sc = source.getContext("2d")!;
+  const ratio = Math.min(640 / photo.width, 760 / photo.height);
+  const w = photo.width * ratio,
+    h = photo.height * ratio;
+  sc.drawImage(photo, (640 - w) / 2, (760 - h) / 2, w, h);
+  const frame = sc.getImageData(0, 0, 640, 760),
+    px = frame.data;
+  const corners = [
+    [3, 3],
+    [636, 3],
+    [3, 756],
+    [636, 756],
+  ].map(([x, y]) => {
+    const i = (y * 640 + x) * 4;
+    return [px[i], px[i + 1], px[i + 2]];
+  });
+  const bg = [0, 1, 2].map((c) => corners.reduce((n, p) => n + p[c], 0) / 4);
+  const uniform = corners.every(
+    (p) => Math.hypot(p[0] - bg[0], p[1] - bg[1], p[2] - bg[2]) < 35,
+  );
+  if (uniform)
+    for (let i = 0; i < px.length; i += 4) {
+      const diff = Math.hypot(
+        px[i] - bg[0],
+        px[i + 1] - bg[1],
+        px[i + 2] - bg[2],
+      );
+      px[i + 3] = Math.round(
+        px[i + 3] * THREE.MathUtils.smoothstep(diff, 22, 65),
+      );
+    }
+  sc.putImageData(frame, 0, 0);
+  const output = document.createElement("canvas");
+  output.width = 1024;
+  output.height = 1024;
+  const ctx = output.getContext("2d")!;
+  ctx.drawImage(base.image as HTMLCanvasElement, 0, 0);
+  ctx.drawImage(source, 140, 65, 744, 920);
+  const texture = new THREE.CanvasTexture(output);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
+}
