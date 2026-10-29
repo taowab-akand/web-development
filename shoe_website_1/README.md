@@ -4,7 +4,7 @@ A cinematic footwear storefront built in `taowab-akand/web-development/shoe_webs
 
 ## Experience
 
-- Fullscreen, reversible scroll-driven canvas sequence from the supplied 239-frame ZIP, synchronized chapter headlines, skip link, reduced-motion fallback, bounded progressive image decoding and mobile assets.
+- Fullscreen, reversible scroll-driven canvas sequence from the supplied 239-frame ZIP, synchronized chapter headlines, skip link, reduced-motion fallback, bounded progressive image decoding and mobile assets. The opening alone owns the pinned background; the navigation and four marketing chapters sit above it. Copy follows the frame actually drawn, and the sequence reaches its final frame at 88% of the track before releasing into the showroom. Encoded frames preload progressively; a 14-frame decoded window is retained, and offscreen work pauses.
 - Interactive illuminated eight-shoe showroom with shared-element product transitions.
 - Responsive catalog, category/gender/size/color/price/rating filters, search suggestions, sorting, wishlist, comparison, size chart, zoom and motion study.
 - Persistent bag, variant quantities, server-side coupons, shipping calculations and cash-on-delivery checkout.
