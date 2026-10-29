@@ -1,1 +1,2 @@
+import './build.mjs';
 import{spawn}from'node:child_process';import{mkdirSync}from'node:fs';import{resolve}from'node:path';mkdirSync('.wrangler/logs',{recursive:true});const p=spawn(process.execPath,['node_modules/wrangler/bin/wrangler.js','dev','--local','--ip','127.0.0.1','--port','8787','--persist-to','.wrangler/state'],{stdio:'inherit',env:{...process.env,WRANGLER_LOG_PATH:resolve('.wrangler/logs/dev.log'),XDG_CONFIG_HOME:resolve('.wrangler/config'),CLOUDFLARE_CF_FETCH_ENABLED:'false',WRANGLER_SEND_METRICS:'false'}});p.on('exit',code=>process.exit(code||0));

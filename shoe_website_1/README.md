@@ -4,7 +4,7 @@ A cinematic footwear storefront built in `taowab-akand/web-development/shoe_webs
 
 ## Experience
 
-- Fullscreen, reversible scroll-driven canvas sequence from the supplied 239-frame ZIP, synchronized chapter headlines, skip link, reduced-motion fallback, bounded progressive image decoding and mobile assets. The opening alone owns the pinned background; the navigation and four marketing chapters sit above it. Copy follows the frame actually drawn, and the sequence reaches its final frame at 88% of the track before releasing into the showroom. Encoded frames preload progressively; a 14-frame decoded window is retained, and offscreen work pauses.
+- Fullscreen, reversible scroll-driven canvas sequence using the 221 frames uploaded to `shoe_website_1/shoe frames`, with synchronized chapter headlines and a skip link. The opening alone owns the pinned background; the navigation and four marketing chapters sit above it. The portfolio technique blends neighboring frames with time-based scroll easing, keeps a bounded decoded image cache, and releases into the showroom after the final reveal. Reduced-motion preferences remove catch-up movement while preserving deliberate scroll scrubbing.
 - Interactive illuminated eight-shoe showroom with shared-element product transitions.
 - Responsive catalog, category/gender/size/color/price/rating filters, search suggestions, sorting, wishlist, comparison, size chart, zoom and motion study.
 - Persistent bag, variant quantities, server-side coupons, shipping calculations and cash-on-delivery checkout.
@@ -23,7 +23,7 @@ npx wrangler dev --local --port 8787
 npm test
 ```
 
-The production bundle is `dist/server/index.js` with static assets in `dist/client`. `.openai/hosting.json` retains the private Sites project identity and the `DB` D1 binding. SQL is in `drizzle/0000_shop.sql`; apply migrations before serving API requests. Never rerun an already applied migration. `scripts/build.mjs` builds both browser and Worker output.
+The production bundle is `dist/server/index.js` with static assets in `dist/client`. `.openai/hosting.json` retains the private Sites project identity and the `DB` D1 binding. SQL is in `drizzle/0000_shop.sql`; apply migrations before serving API requests. Never rerun an already applied migration. `scripts/build.mjs` builds both browser and Worker output. Vite runs `scripts/frames.mjs` before production builds and client development to validate the authoritative `shoe frames` folder, generate `src/shoeFrames.json`, and copy the exact images into the ignored `public/shoe frames` directory. `npm run dev` rebuilds before starting Wrangler; `npm run dev:client` also prepares the frames automatically.
 
 ## Owner setup
 
@@ -45,7 +45,7 @@ Authentication uses hosting-owned Sign in with ChatGPT. Custom email/password ac
 
 ## Asset integrity
 
-The ZIP contains 239 numbered entries, including 18 zero-byte frames. All original checksums matched the supplied manifest. Empty files were replaced with nearest valid neighboring frames, keeping the numerical sequence and preventing blank renders. Full audit: `public/frames/validation.json`. Original-size frames are 1920×1080; mobile frames are 800×450. Product imagery was generated as a transparent atlas; SVG viewports present each product without modifying the original generated art.
+The homepage uses the exact 221 nonempty WebP images uploaded to the GitHub `shoe_website_1/shoe frames` folder. Their numbering spans 1–239, with 18 absent numbers. `src/shoeFrames.json` lists only existing filenames in numerical order, so the animation never requests missing frames or synthesizes replacements. The source images remain unchanged at 1920×1080. The earlier ZIP-derived `public/frames` and `public/frames-mobile` assets remain available for existing product motion-study features; their legacy audit is `public/frames/validation.json`. Product imagery was generated as a transparent atlas; SVG viewports present each product without modifying the original generated art.
 
 ## Verification
 

@@ -21,10 +21,6 @@
 .cinematic-intro .scroll-progress{z-index:4}
 .cinematic-intro .hero-chapters .active{color:#fff}
 .cinematic-intro .hero-chapters .active small{color:var(--orange)}
-.cinematic-intro.reduced{height:100svh}
-.cinematic-intro.reduced .intro-pin{position:relative}
-.cinematic-intro.reduced .scroll-line{display:none}
-.cinematic-intro.reduced .scroll-cue{gap:10px}
 @media(min-width:1500px){.cinematic-intro .hero-copy-stack{left:8vw;width:60vw}.cinematic-intro .hero-chapter h1,.cinematic-intro .hero-chapter h2{font-size:136px}}
 @media(max-width:1100px){.cinematic-intro .hero-copy-stack{width:75vw}.cinematic-intro .hero-chapter h1,.cinematic-intro .hero-chapter h2{font-size:clamp(74px,9.2vw,104px)}}
 @media(max-width:799px) and (orientation:portrait){
@@ -46,7 +42,6 @@
  .cinematic-intro .hero-chapters span{font-size:0;gap:0}
  .cinematic-intro .hero-chapters small{font-size:8px}
  .cinematic-intro .frame-count{font-size:7px}
- .cinematic-intro.reduced{height:100svh}
 }
 @media(max-width:799px) and (min-height:900px) and (orientation:portrait){.cinematic-intro .hero-copy-stack{bottom:calc(140px + 27svh)}}
 @media(max-height:600px) and (orientation:landscape){
@@ -59,6 +54,6 @@
  .cinematic-intro .hero-topline{top:100px;right:5vw;justify-content:flex-end}
  .cinematic-intro .hero-bottom{bottom:16px}
 }
-@media(prefers-reduced-motion:reduce){.cinematic-intro{height:100svh}.cinematic-intro .hero-chapter{transition:none!important;animation:none!important}.cinematic-intro .hero-chapter:not(:first-child){opacity:0!important}.cinematic-intro .hero-chapter:first-child{opacity:1!important}.cinematic-intro .hero-copy{opacity:unset!important}.cinematic-intro .hero-chapter:first-child{opacity:1!important}.cinematic-intro .hero-chapter:not(:first-child){visibility:hidden!important}}
 .cinematic-intro .hero-poster.loaded{opacity:0;transition:opacity .45s ease}
 @media(max-width:799px) and (orientation:portrait){.cinematic-intro .hero-poster{inset:auto;width:172%;height:auto;left:-36%;top:38%;transform:translateY(-50%);object-fit:contain;mask-image:linear-gradient(180deg,transparent 0,#000 32px,#000 calc(100% - 32px),transparent 100%)}}
+@media(prefers-reduced-motion:reduce){.cinematic-intro .hero-chapter{transition:none!important;animation:none!important;will-change:auto}}
